@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { genSalt, hash } from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service";
 import { EnvConfig } from "src/dtos/env-config.dto";
+import { SUPER_ADMIN_ROLE } from "src/common/decorators/super-admin.decorator";
 
 @Injectable()
 export class UserSeeder {
@@ -33,17 +34,17 @@ export class UserSeeder {
     }
 
     const superRole = await this.prisma.role.findFirst({
-      where: { name: "Super Admin" },
+      where: { name: SUPER_ADMIN_ROLE },
     });
 
     if (!superRole) {
-      this.logger.error('Role "Super Admin" not found. Seeder aborted.');
+      this.logger.error(`Role "${SUPER_ADMIN_ROLE}" not found. Seeder aborted.`);
       return;
     }
 
     const superUser = await this.prisma.user.findFirst({
       where: {
-        email: superAdminEmail,
+        email: superAdminEmail.toLowerCase(),
         roleId: superRole.id,
       },
     });

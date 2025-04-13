@@ -7,6 +7,7 @@ import { SeederModule } from "./modules/seeder/seeder.module";
 import { PrismaModule } from "./modules/prisma/prisma.module";
 import { AuthModule } from './modules/auth/auth.module';
 import { RoleModule } from './modules/role/role.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RoleModule } from './modules/role/role.module';
     PrismaModule,
     AuthModule,
     RoleModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

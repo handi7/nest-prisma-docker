@@ -13,6 +13,10 @@ export class EnvConfig {
 
   ORIGIN: string;
 
+  REDIS_HOST: string;
+
+  REDIS_PORT: number;
+
   JWT_SECRET: string;
 
   JWT_EXPIRATION_TIME: string;

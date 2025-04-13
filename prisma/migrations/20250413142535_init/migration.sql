@@ -1,17 +1,8 @@
-/*
-  Warnings:
-
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
-CREATE TYPE "PermissionsEnum" AS ENUM ('view_user', 'edit_user', 'delete_user', 'create_user', 'view_role', 'edit_role', 'delete_role', 'create_role', 'view_permission', 'edit_permission');
+CREATE TYPE "PermissionsEnum" AS ENUM ('view_user', 'edit_user', 'delete_user', 'create_user', 'view_role', 'edit_role', 'delete_role', 'create_role', 'view_permission');
 
 -- CreateEnum
 CREATE TYPE "PermissionCategory" AS ENUM ('user', 'role', 'permission');
-
--- DropTable
-DROP TABLE "User";
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -42,6 +33,7 @@ CREATE TABLE "permissions" (
     "name" "PermissionsEnum" NOT NULL,
     "category" "PermissionCategory" NOT NULL,
     "label" TEXT NOT NULL,
+    "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
 );

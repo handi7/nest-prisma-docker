@@ -1,4 +1,3 @@
-// src/seeder/permission.seeder.ts
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { PermissionCategory, PermissionsEnum } from "prisma/client";

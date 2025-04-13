@@ -1,5 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { SUPER_ADMIN_ROLE } from "src/common/decorators/super-admin.decorator";
 
 @Injectable()
 export class RoleSeeder {
@@ -9,10 +10,10 @@ export class RoleSeeder {
 
   async run() {
     this.logger.log("...");
-    this.logger.log("Seeding Role: Super Admin");
+    this.logger.log(`Seeding Role: ${SUPER_ADMIN_ROLE}`);
 
     const existingRole = await this.prisma.role.findUnique({
-      where: { name: "Super Admin" },
+      where: { name: SUPER_ADMIN_ROLE },
       include: {
         permissions: true,
       },
@@ -36,14 +37,14 @@ export class RoleSeeder {
           skipDuplicates: true,
         });
 
-        this.logger.log("Super Admin role updated with missing permissions.");
+        this.logger.log(`${SUPER_ADMIN_ROLE} role updated with missing permissions.`);
       } else {
-        this.logger.log("Super Admin role already complete.");
+        this.logger.log(`${SUPER_ADMIN_ROLE} role already exist with all permissions.`);
       }
     } else {
       await this.prisma.role.create({
         data: {
-          name: "Super Admin",
+          name: SUPER_ADMIN_ROLE,
           deletedAt: new Date(),
           permissions: {
             createMany: {
@@ -55,7 +56,7 @@ export class RoleSeeder {
         },
       });
 
-      this.logger.log("Super Admin role created with all permissions.");
+      this.logger.log(`${SUPER_ADMIN_ROLE} role created with all permissions.`);
     }
 
     this.logger.log("...");

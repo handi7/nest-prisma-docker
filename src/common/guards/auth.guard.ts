@@ -8,10 +8,12 @@ import {
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
-import { ROLES_KEY } from "../decorators/roles.decorator";
+import { ROLES_KEY } from "../decorators/super-admin.decorator";
 import { PERMISSIONS_KEY } from "../decorators/permissions.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { PermissionsEnum } from "prisma/client";
+import { RedisService } from "src/modules/redis/redis.service";
+import { RedisSession } from "src/dtos/redis-session.dto";
 
 type AuthorizedRequest = Express.Request & { authorization: string };
 
@@ -19,6 +21,7 @@ type AuthorizedRequest = Express.Request & { authorization: string };
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
     private jwtService: JwtService,
     private reflector: Reflector,
   ) {}
@@ -35,31 +38,44 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new UnauthorizedException("Token is required");
 
     try {
-      // Verify JWT
+      // 1. Verify token
       const payload = await this.verifyJwt(token);
+
+      const userId = payload.id ?? payload.sub;
+      if (!userId) throw new UnauthorizedException("Invalid token payload");
+
+      // 2. Cek token di Redis
+      const redisSession = await this.redis.get(`session:${userId}`);
+      if (!redisSession) throw new UnauthorizedException("Session not found");
+
+      const { access_token, refresh_token }: RedisSession = JSON.parse(redisSession);
+
+      if (access_token !== token && refresh_token !== token) {
+        throw new UnauthorizedException("Session expired or replaced");
+      }
+
+      // 3. Ambil user dari DB
       const user = await this.prisma.user.findFirst({
-        where: { id: payload.id, email: payload.email },
+        where: { id: userId },
         include: { role: { include: { permissions: { include: { permission: true } } } } },
       });
       if (!user) throw new UnauthorizedException("User not found");
 
-      // Cek Role jika ada
+      // 4. Cek role & permission
       const requiredRoles = check<string[]>(ROLES_KEY);
-      if (requiredRoles && !requiredRoles.includes(user.role.name)) {
+      if (Boolean(requiredRoles.length) && !requiredRoles.includes(user.role.name)) {
         throw new ForbiddenException("Insufficient role");
       }
 
-      // Cek Permission jika ada
-      const requiredPermissions = check<PermissionsEnum[]>(PERMISSIONS_KEY);
+      const requiredPermissions = check<PermissionsEnum[]>(PERMISSIONS_KEY) ?? [];
       const userPermissions = user.role.permissions.map((p) => p.permission.name);
-      if (
-        requiredPermissions &&
-        !requiredPermissions.some((perm) => userPermissions.includes(perm))
-      ) {
+      const isPermissed = requiredPermissions.some((perm) => userPermissions.includes(perm));
+      if (Boolean(requiredPermissions.length) && !isPermissed) {
         throw new ForbiddenException("Insufficient permission");
       }
 
       request["user"] = user;
+      request["token"] = token;
       return true;
     } catch (error) {
       throw new UnauthorizedException(error.message || "Unauthorized");

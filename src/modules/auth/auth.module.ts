@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { EnvConfig } from "src/dtos/env-config.dto";
 import { APP_GUARD } from "@nestjs/core";
 import { AuthGuard } from "src/common/guards/auth.guard";
+import { RedisModule } from "../redis/redis.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthGuard } from "src/common/guards/auth.guard";
         signOptions: { expiresIn: env.get<string>("JWT_EXPIRATION_TIME") },
       }),
     }),
+    RedisModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, { provide: APP_GUARD, useClass: AuthGuard }],
