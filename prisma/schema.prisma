@@ -47,8 +47,6 @@ model Permission {
   label       String
   roles       RolePermission[] // relasi ke join table
 
-  deletedAt   DateTime?        @map("deleted_at")
-
   @@map("permissions")
 }
 

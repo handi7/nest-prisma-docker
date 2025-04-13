@@ -42,6 +42,7 @@ export class AuthService {
           password: hashedPassword,
           roleId: dto.role_id,
         },
+        include: { role: { include: { permissions: { include: { permission: true } } } } },
       });
 
       return user;

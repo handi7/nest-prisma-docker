@@ -9,9 +9,10 @@ import { PermissionsEnum } from "prisma/client";
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
+  @Permissions(PermissionsEnum.create_role)
   @Post("role")
-  create(@Body() createRoleDto: CreateRoleDto) {
-    return this.roleService.create(createRoleDto);
+  create(@Body() dto: CreateRoleDto) {
+    return this.roleService.create(dto);
   }
 
   @Permissions(PermissionsEnum.view_role)
@@ -20,16 +21,13 @@ export class RoleController {
     return this.roleService.findAll();
   }
 
-  @Get("role/:id")
-  findOne(@Param("id") id: string) {
-    return this.roleService.findOne(+id);
-  }
-
+  @Permissions(PermissionsEnum.edit_role)
   @Patch("role/:id")
   update(@Param("id") id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.roleService.update(+id, updateRoleDto);
   }
 
+  @Permissions(PermissionsEnum.delete_role)
   @Delete("role/:id")
   remove(@Param("id") id: string) {
     return this.roleService.remove(+id);

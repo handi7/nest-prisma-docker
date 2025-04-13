@@ -62,7 +62,7 @@ export class AuthGuard implements CanActivate {
       if (!user) throw new UnauthorizedException("User not found");
 
       // 4. Cek role & permission
-      const requiredRoles = check<string[]>(ROLES_KEY);
+      const requiredRoles = check<string[]>(ROLES_KEY) ?? [];
       if (Boolean(requiredRoles.length) && !requiredRoles.includes(user.role.name)) {
         throw new ForbiddenException("Insufficient role");
       }

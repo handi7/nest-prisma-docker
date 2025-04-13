@@ -8,6 +8,7 @@ import { PrismaModule } from "./modules/prisma/prisma.module";
 import { AuthModule } from './modules/auth/auth.module';
 import { RoleModule } from './modules/role/role.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { PermissionModule } from './modules/permission/permission.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RedisModule } from './modules/redis/redis.module';
     AuthModule,
     RoleModule,
     RedisModule,
+    PermissionModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
