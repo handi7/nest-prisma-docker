@@ -17,6 +17,8 @@ export class EnvConfig {
 
   REDIS_PORT: number;
 
+  REDIS_PASSWORD: number;
+
   JWT_SECRET: string;
 
   JWT_EXPIRATION_TIME: string;

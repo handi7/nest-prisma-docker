@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "./client"
+  provider      = "prisma-client-js"
+  output        = "./client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -16,14 +16,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  email     String   @unique
-  password  String   @map("password") // Prisma gak ada select: false, handle di service layer
+  email     String    @unique
+  password  String    @map("password") // Prisma gak ada select: false, handle di service layer
   roleId    Int
-  role      Role     @relation(fields: [roleId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      Role      @relation(fields: [roleId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime? @map("deleted_at")
 
   @@map("users")
@@ -35,17 +35,17 @@ model Role {
   users       User[]
   permissions RolePermission[] // relasi ke join table
 
-  deletedAt   DateTime?        @map("deleted_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("roles")
 }
 
 model Permission {
-  id          Int              @id @default(autoincrement())
-  name        PermissionsEnum  @unique
-  category    PermissionCategory
-  label       String
-  roles       RolePermission[] // relasi ke join table
+  id       Int                @id @default(autoincrement())
+  name     PermissionsEnum    @unique
+  category PermissionCategory
+  label    String
+  roles    RolePermission[] // relasi ke join table
 
   @@map("permissions")
 }
@@ -54,8 +54,8 @@ model RolePermission {
   roleId       Int
   permissionId Int
 
-  role         Role       @relation(fields: [roleId], references: [id])
-  permission   Permission @relation(fields: [permissionId], references: [id])
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
 
   @@id([roleId, permissionId])
   @@map("role_permissions")
