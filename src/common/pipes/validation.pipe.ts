@@ -13,43 +13,35 @@ export class CustomValidationPipe extends ValidationPipe {
           validation: formattedErrors,
         });
       },
-      stopAtFirstError: true,
+      stopAtFirstError: false,
     });
   }
 
-  private static formatErrors(errors: ValidationError[]): any {
-    let formatted: Record<string, any> = {};
+  private static formatErrors(
+    errors: ValidationError[],
+    parentPath = "",
+  ): { field: string; messages: string[] }[] {
+    const result: { field: string; messages: string[] }[] = [];
 
     errors.forEach((error) => {
-      if (error.children && error.children.length) {
-        if (Array.isArray(formatted[error.property])) {
-          formatted[error.property].push(this.formatErrors(error.children));
-        } else if (/^\d+$/.test(error.property)) {
-          // Jika properti adalah angka, artinya bagian dari array
-          const index = Number(error.property);
-          if (!Array.isArray(formatted)) Object.assign(formatted, []);
-          formatted[index] = this.formatErrors(error.children);
-        } else {
-          formatted[error.property] = this.formatErrors(error.children);
-        }
+      const isNumeric = /^\d+$/.test(error.property);
+      const fieldPath = parentPath
+        ? `${parentPath}.${isNumeric ? error.property : error.property}`
+        : error.property;
+
+      if (error.children && error.children.length > 0) {
+        // Rekursif untuk nested (object / array)
+        result.push(...this.formatErrors(error.children, fieldPath));
+      } else if (error.constraints) {
+        // Ambil semua pesan error dari constraint
+        const messages = Object.values(error.constraints);
+        result.push({ field: fieldPath, messages });
       } else {
-        formatted[error.property] = error.constraints
-          ? Object.values(error.constraints)[0]
-          : "Invalid input";
+        // Default fallback
+        result.push({ field: fieldPath, messages: ["Invalid input"] });
       }
     });
 
-    // Jika ada properti yang numerik (array), ubah object jadi array
-    Object.keys(formatted).forEach((key) => {
-      if (/^\d+$/.test(key)) {
-        const arrayErrors = Object.keys(formatted)
-          .filter((k) => /^\d+$/.test(k))
-          .map((k) => formatted[k]);
-
-        formatted = arrayErrors;
-      }
-    });
-
-    return formatted;
+    return result;
   }
 }

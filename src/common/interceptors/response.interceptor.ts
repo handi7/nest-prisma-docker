@@ -1,68 +1,73 @@
 import {
   CallHandler,
   ExecutionContext,
+  HttpCode,
   HttpException,
+  HttpStatus,
   Injectable,
   Logger,
   NestInterceptor,
 } from "@nestjs/common";
-import { STATUS_CODES } from "http";
 import { catchError, map, Observable, throwError } from "rxjs";
+import { Request, Response } from "express";
+import { STATUS_CODES } from "http";
+import { colorResponseCode, colorResponseTime } from "../helpers/ansi-color";
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
-    const statusCode = response.statusCode;
+  private logger = new Logger();
 
-    const logger = new Logger();
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const response = context.switchToHttp().getResponse<Response>();
 
     return next.handle().pipe(
-      map((data) => {
-        const logMessage = `${request.originalUrl} --> ${statusCode} ${STATUS_CODES[statusCode]}`;
-        logger.log(logMessage, request.method);
+      map((data) => this.handleSuccess(request, response, data)),
 
-        return {
-          method: request.method,
-          path: request.url,
-          timestamp: new Date().toISOString(),
-          statusCode,
-          success: true,
-          data,
-          error: null,
-        };
-      }),
       catchError((err) => {
         const statusCode = err instanceof HttpException ? err.getStatus() : 500;
-
-        const isErrorValidation = Boolean(err.response?.validation);
-
-        if (isErrorValidation && !request.originalUrl.startsWith("/auth")) {
-          logger.log(request.body, "REQUEST");
-        }
-
-        const logMessage = `${request.originalUrl} --> ${statusCode} ${err.message}`;
-        const stack = err.response || err.stack;
-        logger.error(logMessage, stack, request.method);
-
-        const error = {
-          type: STATUS_CODES?.[statusCode] || err.response?.error || err.name || "Error",
-          message: statusCode === 500 ? "Internal Server Error" : err.message,
-          errors: err.response?.validation || null,
-        };
-
-        const errorResponse = {
-          method: request.method,
-          path: request.url,
-          timestamp: new Date().toISOString(),
-          statusCode,
-          success: false,
-          data: null,
-          error,
-        };
-        return throwError(() => new HttpException(errorResponse, statusCode));
+        return throwError(() => new HttpException(err, statusCode));
       }),
     );
+  }
+
+  private handleSuccess(request: Request, response: Response, data: any) {
+    const statusCode = response.statusCode;
+    const coloredStatusCode = colorResponseCode(statusCode);
+    const status = STATUS_CODES[response.statusCode];
+
+    const startTime = request.startTime;
+    const durationMs = startTime
+      ? ((process.hrtime(startTime)[0] * 1e9 + process.hrtime(startTime)[1]) / 1e6).toFixed(2)
+      : 0;
+
+    const duration = colorResponseTime(Number(durationMs));
+
+    const logMessage = `\x1b[37m${request.originalUrl} \x1b[36m--> ${coloredStatusCode} ${status} ${duration}`;
+    this.logger.log(logMessage, request.method);
+
+    const responseData = {
+      method: request.method,
+      route: request.url,
+      timestamp: new Date().toISOString(),
+      responseTime: `${durationMs}ms`,
+      statusCode: response.statusCode,
+      success: true,
+      message: HttpStatus[statusCode],
+      data: data,
+      meta: null,
+      error: null,
+    };
+
+    if (data?.message) {
+      responseData.message = data.message;
+    }
+
+    if (data?.data && data?.meta) {
+      responseData.data = data.data;
+      responseData.meta = data.meta;
+    }
+
+    return responseData;
   }
 }

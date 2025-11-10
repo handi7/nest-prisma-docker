@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { genSalt, hash } from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service";
-import { EnvConfig } from "src/dtos/env-config.dto";
+import { EnvConfig } from "src/common/dtos/env-config.dto";
 import { SUPER_ADMIN_ROLE } from "src/common/decorators/super-admin.decorator";
 
 @Injectable()

@@ -5,6 +5,8 @@ export class EnvConfig {
 
   DB_PORT: number;
 
+  DB_EXPOSE_PORT: number;
+
   DB_USER: string;
 
   DB_PASSWORD: string;

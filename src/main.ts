@@ -3,7 +3,7 @@ import { AppModule } from "./app.module";
 import { Logger } from "@nestjs/common";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { ConfigService } from "@nestjs/config";
-import { EnvConfig } from "./dtos/env-config.dto";
+import { EnvConfig } from "./common/dtos/env-config.dto";
 import { CustomValidationPipe } from "./common/pipes/validation.pipe";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 

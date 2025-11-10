@@ -10,10 +10,10 @@ import { JwtService } from "@nestjs/jwt";
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
 import { ROLES_KEY } from "../decorators/super-admin.decorator";
 import { PERMISSIONS_KEY } from "../decorators/permissions.decorator";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { PrismaService } from "src/services/prisma/prisma.service";
 import { PermissionsEnum } from "prisma/client";
-import { RedisService } from "src/modules/redis/redis.service";
-import { RedisSession } from "src/dtos/redis-session.dto";
+import { RedisService } from "src/services/redis/redis.service";
+import { RedisSession } from "src/common/dtos/redis-session.dto";
 
 type AuthorizedRequest = Express.Request & { authorization: string };
 

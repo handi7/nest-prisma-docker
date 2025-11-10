@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { UpdateRoleDto } from "./dto/update-role.dto";
-import { PrismaService } from "../prisma/prisma.service";
+import { PrismaService } from "../../services/prisma/prisma.service";
 import { SUPER_ADMIN_ROLE } from "src/common/decorators/super-admin.decorator";
 
 @Injectable()

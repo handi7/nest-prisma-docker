@@ -3,10 +3,10 @@ import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { EnvConfig } from "src/dtos/env-config.dto";
+import { EnvConfig } from "src/common/dtos/env-config.dto";
 import { APP_GUARD } from "@nestjs/core";
 import { AuthGuard } from "src/common/guards/auth.guard";
-import { RedisModule } from "../redis/redis.module";
+import { RedisModule } from "../../services/redis/redis.module";
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { RedisModule } from "../redis/redis.module";
       inject: [ConfigService],
       useFactory: (env: ConfigService<EnvConfig>) => ({
         secret: env.get<string>("JWT_SECRET"),
-        signOptions: { expiresIn: env.get<string>("JWT_EXPIRATION_TIME") },
+        signOptions: { expiresIn: env.get("JWT_EXPIRATION_TIME", "10m") },
       }),
     }),
     RedisModule,

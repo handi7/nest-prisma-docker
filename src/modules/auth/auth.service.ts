@@ -9,10 +9,10 @@ import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { JwtService } from "@nestjs/jwt";
 import { compareSync, genSalt, hash } from "bcryptjs";
-import { PrismaService } from "../prisma/prisma.service";
-import { RedisService } from "../redis/redis.service";
-import { UserDto } from "src/dtos/user.dto";
-import { RedisSession } from "src/dtos/redis-session.dto";
+import { PrismaService } from "../../services/prisma/prisma.service";
+import { RedisService } from "../../services/redis/redis.service";
+import { UserDto } from "src/common/dtos/user.dto";
+import { RedisSession } from "src/common/dtos/redis-session.dto";
 
 @Injectable()
 export class AuthService {

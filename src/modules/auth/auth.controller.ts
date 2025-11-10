@@ -5,7 +5,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { LoginDto } from "./dto/login.dto";
 import { Permissions } from "src/common/decorators/permissions.decorator";
 import { PermissionsEnum } from "prisma/client";
-import { RequestDto } from "src/dtos/request.dto";
+import { RequestDto } from "src/common/dtos/request.dto";
 
 @Controller("auth")
 export class AuthController {
