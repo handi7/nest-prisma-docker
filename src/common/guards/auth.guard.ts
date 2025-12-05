@@ -1,17 +1,8 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-  ForbiddenException,
-} from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
-import { ROLES_KEY } from "../decorators/super-admin.decorator";
-import { PERMISSIONS_KEY } from "../decorators/permissions.decorator";
 import { PrismaService } from "src/services/prisma/prisma.service";
-import { PermissionsEnum } from "prisma/client";
 import { RedisService } from "src/services/redis/redis.service";
 import { RedisSession } from "src/common/dtos/redis-session.dto";
 
@@ -48,30 +39,30 @@ export class AuthGuard implements CanActivate {
       const redisSession = await this.redis.get(`session:${userId}`);
       if (!redisSession) throw new UnauthorizedException("Session not found");
 
-      const { access_token, refresh_token }: RedisSession = JSON.parse(redisSession);
+      const session: RedisSession = JSON.parse(redisSession);
 
-      if (access_token !== token && refresh_token !== token) {
+      if (session.access_token !== token && session.refresh_token !== token) {
         throw new UnauthorizedException("Session expired or replaced");
       }
 
-      // 3. Ambil user dari DB
-      const user = await this.prisma.user.findFirst({
-        where: { id: userId },
-        include: { role: { include: { permissions: { include: { permission: true } } } } },
-      });
-      if (!user) throw new UnauthorizedException("User not found");
+      // 3. Ambil user dari Redis atau DB
+      let user = session.user;
 
-      // 4. Cek role & permission
-      const requiredRoles = check<string[]>(ROLES_KEY) ?? [];
-      if (Boolean(requiredRoles.length) && !requiredRoles.includes(user.role.name)) {
-        throw new ForbiddenException("Insufficient role");
-      }
+      if (!user) {
+        user = await this.prisma.user.findFirst({
+          where: { id: userId },
+          include: {
+            role: {
+              include: { permissions: { include: { permission: true } } },
+            },
+          },
+          omit: { password: true },
+        });
 
-      const requiredPermissions = check<PermissionsEnum[]>(PERMISSIONS_KEY) ?? [];
-      const userPermissions = user.role.permissions.map((p) => p.permission.name);
-      const isPermissed = requiredPermissions.some((perm) => userPermissions.includes(perm));
-      if (Boolean(requiredPermissions.length) && !isPermissed) {
-        throw new ForbiddenException("Insufficient permission");
+        if (!user) throw new UnauthorizedException("User not found");
+
+        session.user = user;
+        await this.redis.set(`session:${userId}`, JSON.stringify(session), 60 * 60 * 24 * 7);
       }
 
       request["user"] = user;
@@ -83,7 +74,9 @@ export class AuthGuard implements CanActivate {
   }
 
   private async verifyJwt(token: string) {
-    return this.jwtService.verifyAsync(token, { secret: process.env.JWT_SECRET });
+    return this.jwtService.verifyAsync(token, {
+      secret: process.env.JWT_SECRET,
+    });
   }
 
   private extractTokenFromHeader(headers: AuthorizedRequest): string | undefined {

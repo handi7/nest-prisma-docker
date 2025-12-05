@@ -45,7 +45,7 @@ export class UserSeeder {
     const superUser = await this.prisma.user.findFirst({
       where: {
         email: superAdminEmail.toLowerCase(),
-        roleId: superRole.id,
+        role_id: superRole.id,
       },
     });
 
@@ -62,7 +62,7 @@ export class UserSeeder {
         name: superAdminName,
         email: superAdminEmail,
         password: hashedPassword,
-        roleId: superRole.id,
+        role_id: superRole.id,
       },
     });
 

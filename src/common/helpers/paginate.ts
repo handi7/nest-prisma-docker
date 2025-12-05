@@ -1,8 +1,8 @@
 export interface PaginateOptions {
   page?: number;
-  size?: number;
+  limit?: number;
   searchFields?: string[];
-  s?: string;
+  search?: string;
   sortBy?: string;
   desc?: boolean;
   allowedSortBy?: string[];
@@ -26,14 +26,15 @@ export async function paginate<T, Args extends PaginateArgs, R = T>(
 ) {
   const {
     page = 1,
-    s: search = "",
+    limit = 10,
+    search = "",
     searchFields = [],
     sortBy = "",
     desc = false,
     allowedSortBy = [],
   } = options;
 
-  const size = Number(options.size) || 10;
+  const size = Number(limit) || 10;
 
   const where = args.where || {};
 
@@ -74,7 +75,7 @@ export async function paginate<T, Args extends PaginateArgs, R = T>(
       total,
       totalPages,
       page,
-      size,
+      limit,
       prevPage,
       nextPage,
       search,

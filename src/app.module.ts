@@ -6,7 +6,7 @@ import { PrismaModule } from "./services/prisma/prisma.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { RoleModule } from "./modules/role/role.module";
 import { RedisModule } from "./services/redis/redis.module";
-import { PermissionModule } from "./modules/permission/permission.module";
+import { PermissionModule } from "./services/permission/permission.module";
 
 @Module({
   imports: [

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { PermissionCategory, PermissionsEnum } from "prisma/client";
+import { PermissionsEnum } from "generated/prisma/enums";
 
 @Injectable()
 export class PermissionSeeder {
@@ -22,11 +22,10 @@ export class PermissionSeeder {
           .split("_")
           .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
           .join(" ");
-        const [, category] = name.split("_");
+
         return {
           name,
           label,
-          category: category as PermissionCategory,
         };
       });
 

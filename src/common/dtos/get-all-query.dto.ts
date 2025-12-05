@@ -1,14 +1,14 @@
 import { IsBooleanString, IsNumberString, IsOptional } from "class-validator";
 
-export class GetAllQuery {
+export class GetAllQueryDto {
   @IsNumberString()
   page: string = "1";
 
   @IsNumberString()
   @IsOptional()
-  size: string;
+  limit: string;
 
-  s: string = "";
+  search: string = "";
 
   sortBy: string;
 

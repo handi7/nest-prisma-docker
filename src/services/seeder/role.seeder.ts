@@ -22,7 +22,7 @@ export class RoleSeeder {
     const allPermissions = await this.prisma.permission.findMany();
 
     if (existingRole) {
-      const existingPermissionIds = new Set(existingRole.permissions.map((p) => p.permissionId));
+      const existingPermissionIds = new Set(existingRole.permissions.map((p) => p.permission_id));
 
       const missingPermissions = allPermissions.filter(
         (perm) => !existingPermissionIds.has(perm.id),
@@ -31,8 +31,8 @@ export class RoleSeeder {
       if (missingPermissions.length > 0) {
         await this.prisma.rolePermission.createMany({
           data: missingPermissions.map((perm) => ({
-            roleId: existingRole.id,
-            permissionId: perm.id,
+            role_id: existingRole.id,
+            permission_id: perm.id,
           })),
           skipDuplicates: true,
         });
@@ -45,11 +45,11 @@ export class RoleSeeder {
       await this.prisma.role.create({
         data: {
           name: SUPER_ADMIN_ROLE,
-          deletedAt: new Date(),
+          deleted_at: new Date(),
           permissions: {
             createMany: {
               data: allPermissions.map((perm) => ({
-                permissionId: perm.id,
+                permission_id: perm.id,
               })),
             },
           },

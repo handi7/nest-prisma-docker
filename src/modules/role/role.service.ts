@@ -51,7 +51,7 @@ export class RoleService {
   }
 
   findAll() {
-    return this.prisma.role.findMany({ where: { deletedAt: null } });
+    return this.prisma.role.findMany({ where: { deleted_at: null } });
   }
 
   update(id: number, updateRoleDto: UpdateRoleDto) {
