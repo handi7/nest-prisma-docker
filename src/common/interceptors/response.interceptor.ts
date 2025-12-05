@@ -1,7 +1,6 @@
 import {
   CallHandler,
   ExecutionContext,
-  HttpCode,
   HttpException,
   HttpStatus,
   Injectable,
@@ -54,7 +53,7 @@ export class ResponseInterceptor implements NestInterceptor {
       statusCode: response.statusCode,
       success: true,
       message: HttpStatus[statusCode],
-      data: data,
+      data: null,
       meta: null,
       error: null,
     };
@@ -63,8 +62,13 @@ export class ResponseInterceptor implements NestInterceptor {
       responseData.message = data.message;
     }
 
-    if (data?.data && data?.meta) {
+    if (data?.data) {
       responseData.data = data.data;
+    } else if (!data?.message && !data?.meta) {
+      responseData.data = data ?? null;
+    }
+
+    if (data?.meta) {
       responseData.meta = data.meta;
     }
 

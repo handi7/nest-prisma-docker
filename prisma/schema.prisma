@@ -88,4 +88,9 @@ enum PermissionsEnum {
   edit_role
   delete_role
   create_role
+
+  view_user_invite
+  edit_user_invite
+  delete_user_invite
+  create_user_invite
 }

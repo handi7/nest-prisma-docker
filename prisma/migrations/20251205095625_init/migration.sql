@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "PermissionsEnum" AS ENUM ('view_user', 'edit_user', 'delete_user', 'create_user', 'view_role', 'edit_role', 'delete_role', 'create_role');
+CREATE TYPE "PermissionsEnum" AS ENUM ('view_user', 'edit_user', 'delete_user', 'create_user', 'view_role', 'edit_role', 'delete_role', 'create_role', 'view_user_invite', 'edit_user_invite', 'delete_user_invite', 'create_user_invite');
 
 -- CreateTable
 CREATE TABLE "users" (
