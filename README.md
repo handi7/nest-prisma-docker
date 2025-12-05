@@ -1,85 +1,152 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NestJS Prisma Docker Boilerplate
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A robust boilerplate for building scalable backend applications using **NestJS**, **Prisma**, and **PostgreSQL**, fully containerized with **Docker**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+- **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications.
+- **Prisma ORM**: Next-generation Node.js and TypeScript ORM for PostgreSQL.
+- **PostgreSQL**: Powerful, open source object-relational database system.
+- **Docker & Docker Compose**: Containerization for consistent development and production environments.
+- **Authentication**:
+  - JWT (JSON Web Token) Authentication.
+  - Google OAuth2 Integration.
+  - Role-Based Access Control (RBAC) with Permissions.
+- **User Management**:
+  - User Registration & Login.
+  - Password Reset Flow (Email-based).
+  - User Invitation System.
+- **Validation**: Request validation using `class-validator` and `class-transformer`.
+- **Email Service**: Integrated email sending capabilities (using `nodemailer`).
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🛠️ Tech Stack
 
-## Project setup
+- [NestJS](https://nestjs.com/)
+- [Prisma](https://www.prisma.io/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Docker](https://www.docker.com/)
+- [Passport](http://www.passportjs.org/)
+- [RxJS](https://rxjs.dev/)
 
-```bash
-$ yarn install
+## 📂 Project Structure
+
+```
+nest-prisma-docker/
+├── prisma/              # Prisma schema and migrations
+├── src/
+│   ├── common/          # Shared decorators, filters, guards, etc.
+│   ├── modules/         # Application modules (Auth, User, Role, etc.)
+│   ├── services/        # Shared services (Email, etc.)
+│   ├── types/           # Custom type definitions
+│   ├── app.module.ts    # Main application module
+│   └── main.ts          # Application entry point
+├── test/                # E2E tests
+├── Dockerfile           # Docker configuration for the app
+├── docker-compose.yml   # Docker Compose configuration
+└── package.json         # Dependencies and scripts
 ```
 
-## Compile and run the project
+## ⚡ Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- [Docker](https://www.docker.com/) & Docker Compose
+- [Yarn](https://yarnpkg.com/) (optional, but recommended)
+
+### Environment Setup
+
+1.  Clone the repository.
+2.  Copy the example environment file:
+    ```bash
+    cp .env.example .env
+    ```
+3.  Update `.env` with your configuration (Database credentials, JWT secret, Email settings, etc.).
+
+### Running with Docker (Recommended)
+
+Start the application and database containers:
 
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+# Development mode
+yarn dev:d
+# OR
+npm run dev:d
 ```
 
-## Run tests
+This command will:
+
+1.  Generate Prisma client.
+2.  Build and start the containers.
+3.  Watch for file changes.
+
+To stop the containers and remove volumes:
 
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+yarn dev-clean:d
+# OR
+npm run dev-clean:d
 ```
 
-## Resources
+### Running Locally
 
-Check out a few resources that may come in handy when working with NestJS:
+1.  Install dependencies:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+    ```bash
+    yarn install
+    ```
 
-## Support
+2.  Start the database (you can use the docker-compose file just for the DB if you wish, or a local Postgres instance).
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+3.  Run migrations and generate Prisma client:
 
-## Stay in touch
+    ```bash
+    yarn migrate
+    yarn generate
+    ```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+4.  Start the application:
 
-## License
+    ```bash
+    # Development
+    yarn start:dev
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+    # Production
+    yarn start:prod
+    ```
+
+## 📜 Scripts
+
+| Script           | Description                                 |
+| :--------------- | :------------------------------------------ |
+| `yarn start:dev` | Starts the app in watch mode.               |
+| `yarn dev:d`     | Starts the app and DB in Docker (dev mode). |
+| `yarn migrate`   | Runs Prisma migrations.                     |
+| `yarn generate`  | Generates Prisma client.                    |
+| `yarn test`      | Runs unit tests.                            |
+| `yarn test:e2e`  | Runs end-to-end tests.                      |
+| `yarn lint`      | Lints the codebase.                         |
+
+## 🛡️ Authentication & RBAC
+
+The application uses **Passport** for authentication strategies.
+
+- **JWT Strategy**: Used for protecting API endpoints.
+- **Google Strategy**: Used for OAuth2 login.
+
+**RBAC (Role-Based Access Control)** is implemented using `Roles` and `Permissions`.
+
+- **Roles**: Define a set of permissions (e.g., Admin, User).
+- **Permissions**: Granular access rights (e.g., `create_user`, `view_role`).
+
+## 📧 Email Service
+
+The project includes an email service for sending transactional emails (e.g., password reset, welcome emails). Ensure you configure the `MAIL_*` environment variables in `.env`.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
