@@ -1,86 +1,110 @@
-export interface PaginateOptions {
-  page?: number;
-  limit?: number;
-  searchFields?: string[];
-  search?: string;
-  sortBy?: string;
-  desc?: boolean;
-  allowedSortBy?: string[];
-}
+import { PaginateOptions, PaginateResult, PrismaPaginateModel } from "src/types/Pagination";
+import { BasePaginationQueryDto } from "../dtos/base-pagination-query.dto";
 
-interface PaginateArgs {
-  where?: any;
-  orderBy?: any;
-  skip?: number;
-  take?: number;
-}
-
-export async function paginate<T, Args extends PaginateArgs, R = T>(
-  prismaModel: {
-    findMany: (args: Args) => Promise<T[]>;
-    count: (args?: any) => Promise<number>;
+export async function paginate<
+  Entity,
+  FindManyArgs extends {
+    where?: any;
+    orderBy?: any;
+    skip?: number;
+    take?: number;
   },
-  args: Args,
-  options: PaginateOptions = {},
-  mapper?: (item: T) => R,
-) {
+  Mapped = Entity,
+>(
+  model: PrismaPaginateModel<FindManyArgs, Entity>,
+  baseArgs: FindManyArgs,
+  options: PaginateOptions<Entity> = {},
+  mapper?: (item: Entity) => Mapped,
+): Promise<PaginateResult<Mapped>> {
   const {
     page = 1,
     limit = 10,
-    search = "",
+    search,
     searchFields = [],
-    sortBy = "",
+    sortBy,
     desc = false,
     allowedSortBy = [],
   } = options;
 
-  const size = Number(limit) || 10;
+  const safePage = Math.max(page, 1);
+  const safeLimit = Math.min(Math.max(limit, 1), 100); // anti abuse
 
-  const where = args.where || {};
+  const where = { ...(baseArgs.where || {}) };
 
-  if (search && searchFields.length) {
-    const searchQuery = searchFields.map((field) => ({
+  // 🔍 SEARCH
+  const searchWhere = buildSearchWhere<Entity>(search ?? "", searchFields);
+  if (searchWhere) {
+    where.AND = where.AND
+      ? [...(Array.isArray(where.AND) ? where.AND : [where.AND]), searchWhere]
+      : [searchWhere];
+  }
+
+  // ↕️ SORT
+  const isSortAllowed =
+    sortBy && allowedSortBy.length ? allowedSortBy.includes(sortBy as keyof Entity) : false;
+
+  const orderBy = isSortAllowed ? [{ [sortBy!]: desc ? "desc" : "asc" }] : (baseArgs.orderBy ?? []);
+
+  const skip = (safePage - 1) * safeLimit;
+  const take = safeLimit;
+
+  const [data, total] = await Promise.all([
+    model.findMany({
+      ...baseArgs,
+      where,
+      orderBy,
+      skip,
+      take,
+    }),
+    model.count(where),
+  ]);
+
+  const mapped = mapper ? data.map(mapper) : (data as unknown as Mapped[]);
+
+  const totalPages = Math.ceil(total / safeLimit);
+
+  return {
+    data: mapped,
+    meta: {
+      total,
+      totalPages,
+      page: safePage,
+      limit: safeLimit,
+      prevPage: safePage > 1 ? safePage - 1 : null,
+      nextPage: safePage < totalPages ? safePage + 1 : null,
+      search,
+      sortBy: isSortAllowed ? sortBy! : null,
+      desc,
+    },
+  };
+}
+
+function buildSearchWhere<Entity>(
+  search: string,
+  fields: (keyof Entity)[],
+): Record<string, any> | undefined {
+  if (!search || !fields.length) return undefined;
+
+  return {
+    OR: fields.map((field) => ({
       [field]: {
         contains: search,
         mode: "insensitive",
       },
-    }));
+    })),
+  };
+}
 
-    where.OR = searchQuery;
-  }
-
-  const isSortAllowed = allowedSortBy.length > 0 || allowedSortBy.includes(sortBy);
-  const orderBy = isSortAllowed && sortBy ? [{ [sortBy]: desc ? "desc" : "asc" }] : [];
-
-  const [data, total] = await Promise.all([
-    prismaModel.findMany({
-      ...args,
-      where,
-      skip: (page - 1) * size,
-      take: size,
-      orderBy,
-    }),
-    prismaModel.count({ where }),
-  ]);
-
-  const transformed = mapper ? data.map(mapper) : data;
-
-  const totalPages = Math.ceil(total / size);
-  const prevPage = page > 1 ? page - 1 : null;
-  const nextPage = page < totalPages ? page + 1 : null;
-
+export function parsePaginationQuery<Entity>(
+  query: BasePaginationQueryDto,
+  overrides?: Partial<PaginateOptions<Entity>>,
+): PaginateOptions<Entity> {
   return {
-    data: transformed,
-    meta: {
-      total,
-      totalPages,
-      page,
-      limit,
-      prevPage,
-      nextPage,
-      search,
-      sortBy: isSortAllowed ? sortBy : null,
-      desc,
-    },
+    page: query.page ? Number(query.page) : 1,
+    limit: query.limit ? Number(query.limit) : 10,
+    search: query.search,
+    sortBy: query.sortBy,
+    desc: query.desc === "true",
+    ...overrides,
   };
 }

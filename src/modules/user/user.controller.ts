@@ -1,8 +1,8 @@
 import { Controller, Get, Body, Patch, Param, Query } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { GetAllQueryDto } from "src/common/dtos/get-all-query.dto";
 import { Permissions } from "src/common/decorators/permissions.decorator";
+import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
 
 @Controller()
 export class UserController {
@@ -10,7 +10,7 @@ export class UserController {
 
   @Get("users")
   @Permissions("view_user")
-  findAll(@Query() query: GetAllQueryDto) {
+  findAll(@Query() query: BasePaginationQueryDto) {
     return this.userService.findAll(query);
   }
 

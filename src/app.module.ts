@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { PrismaService } from "./services/prisma/prisma.service";
 import { ConfigModule } from "@nestjs/config";
 import { SeederModule } from "./services/seeder/seeder.module";
@@ -9,6 +9,7 @@ import { RedisModule } from "./services/redis/redis.module";
 import { PermissionModule } from "./services/permission/permission.module";
 import { UserInviteModule } from "./modules/user-invite/user-invite.module";
 import { UserModule } from "./modules/user/user.module";
+import { RequestTimerMiddleware } from "./common/middlewares/request-timer.middleware";
 
 @Module({
   imports: [
@@ -28,4 +29,8 @@ import { UserModule } from "./modules/user/user.module";
   controllers: [],
   providers: [PrismaService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestTimerMiddleware).forRoutes("*");
+  }
+}

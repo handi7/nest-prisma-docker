@@ -1,25 +1,20 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { GetAllQueryDto } from "src/common/dtos/get-all-query.dto";
-import { paginate, PaginateOptions } from "src/common/helpers/paginate";
+import { paginate, parsePaginationQuery } from "src/common/helpers/paginate";
 import { Prisma } from "generated/prisma/client";
-import { PrismaService } from "src/services/prisma/prisma.service";
 import { toUserWithRoleAndPermissionNames } from "./user.mapper";
+import { UserRepository } from "./user.repository";
+import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly userRepo: UserRepository) {}
 
-  findAll(query: GetAllQueryDto) {
-    const options: PaginateOptions = {
-      page: Number(query.page) || 1,
-      limit: Number(query.limit) || 10,
-      search: query.search,
+  findAll(query: BasePaginationQueryDto) {
+    const options = parsePaginationQuery(query, {
       searchFields: ["name", "email"],
-      sortBy: query.sortBy,
-      desc: query.desc === "true",
       allowedSortBy: ["name", "email", "created_at", "updated_at"],
-    };
+    });
 
     const args: Prisma.UserFindManyArgs = {
       include: {
@@ -38,11 +33,11 @@ export class UserService {
       },
     };
 
-    return paginate(this.prisma.user, args, options, toUserWithRoleAndPermissionNames);
+    return paginate(this.userRepo, args, options, toUserWithRoleAndPermissionNames);
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.userRepo.findById(id);
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -52,11 +47,13 @@ export class UserService {
   }
 
   async update(id: string, dto: UpdateUserDto) {
-    await this.findOne(id);
+    const user = await this.userRepo.findById(id);
 
-    const user = await this.prisma.user.update({
-      where: { id },
-      data: dto,
+    if (!user) {
+      throw new NotFoundException(`User not found`);
+    }
+
+    const updatedUser = await this.userRepo.update(id, dto, {
       include: {
         role: {
           include: {
@@ -73,6 +70,6 @@ export class UserService {
       },
     });
 
-    return toUserWithRoleAndPermissionNames(user);
+    return toUserWithRoleAndPermissionNames(updatedUser);
   }
 }

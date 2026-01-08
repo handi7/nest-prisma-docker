@@ -1,20 +1,24 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "src/services/prisma/prisma.service";
 import { CreateUserInviteDto } from "./dto/create-user-invite.dto";
 import { v4 as uuidv4 } from "uuid";
 import { ConfigService } from "@nestjs/config";
 import { EnvConfig } from "src/common/dtos/env-config.dto";
-import { paginate, PaginateOptions } from "src/common/helpers/paginate";
-import { GetAllQueryDto } from "src/common/dtos/get-all-query.dto";
+import { paginate, parsePaginationQuery } from "src/common/helpers/paginate";
 import { Prisma } from "generated/prisma/client";
 import * as bcrypt from "bcryptjs";
 import { AcceptInviteDto } from "./dto/accept-invite.dto";
 import { EmailService } from "src/services/email/email.service";
+import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
+import { UserInviteRepository } from "./user-invite.repository";
+import { UserRepository } from "../user/user.repository";
+import { RoleRepository } from "../role/role.repository";
 
 @Injectable()
 export class UserInviteService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly userInviteRepo: UserInviteRepository,
+    private readonly userRepo: UserRepository,
+    private readonly roleRepo: RoleRepository,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService<EnvConfig>,
   ) {}
@@ -22,9 +26,7 @@ export class UserInviteService {
   async create(dto: CreateUserInviteDto) {
     const email = dto.email.toLowerCase();
 
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
+    const existingUser = await this.userInviteRepo.findByEmail(email);
 
     if (existingUser) {
       throw new BadRequestException("User with this email already exists");
@@ -34,18 +36,17 @@ export class UserInviteService {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
-    const invite = await this.prisma.userInvite.upsert({
-      where: { email },
-      update: {
-        token,
-        expires_at: expiresAt,
-        role_id: dto.role_id,
-      },
+    const invite = await this.userInviteRepo.upsertByEmail(email, {
       create: {
         email,
         role_id: dto.role_id,
         token,
         expires_at: expiresAt,
+      },
+      update: {
+        token,
+        expires_at: expiresAt,
+        role_id: dto.role_id,
       },
       include: { role: true },
     });
@@ -55,35 +56,27 @@ export class UserInviteService {
     return { message: "Invite sent successfully", data: invite };
   }
 
-  async findAll(query: GetAllQueryDto) {
-    const options: PaginateOptions = {
-      page: Number(query.page) || 1,
-      limit: Number(query.limit) || 10,
-      search: query.search,
+  async findAll(query: BasePaginationQueryDto) {
+    const queryOptions = parsePaginationQuery(query, {
       searchFields: ["email"],
-      sortBy: query.sortBy,
-      desc: query.desc === "true",
       allowedSortBy: ["email", "created_at"],
-    };
+    });
 
     const args: Prisma.UserInviteFindManyArgs = {
       include: { role: true },
     };
 
-    const pagination = await paginate(this.prisma.userInvite, args, options);
+    const { data, meta: pagination } = await paginate(this.userInviteRepo, args, queryOptions);
 
-    const roles = await this.prisma.role.findMany({
+    const roles = await this.roleRepo.findMany({
       where: { deleted_at: null },
     });
 
-    return { ...pagination, meta: { roles } };
+    return { data, meta: { pagination, roles } };
   }
 
-  async findOne(token: string) {
-    const invite = await this.prisma.userInvite.findUnique({
-      where: { token },
-      include: { role: true },
-    });
+  async findOneByToken(token: string) {
+    const invite = await this.userInviteRepo.findByToken(token);
 
     if (!invite) {
       throw new NotFoundException("Invite not found");
@@ -97,23 +90,21 @@ export class UserInviteService {
   }
 
   async accept(dto: AcceptInviteDto) {
-    const invite = await this.findOne(dto.token);
+    const invite = await this.userInviteRepo.findByToken(dto.token);
 
     const hashedPassword = await bcrypt.hash(
       dto.password,
       Number(this.configService.get("BCRYPT_ROUNDS")) || 10,
     );
 
-    const user = await this.prisma.user.create({
-      data: {
-        name: dto.name,
-        email: invite.email,
-        password: hashedPassword,
-        role_id: invite.role_id,
-      },
+    const user = await this.userRepo.create({
+      name: dto.name,
+      email: invite.email,
+      password: hashedPassword,
+      role: { connect: { id: invite.role_id } },
     });
 
-    await this.prisma.userInvite.delete({ where: { id: invite.id } });
+    await this.userInviteRepo.delete(invite.id);
 
     return user;
   }

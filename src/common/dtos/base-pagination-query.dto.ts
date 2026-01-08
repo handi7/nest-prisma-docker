@@ -1,6 +1,6 @@
 import { IsBooleanString, IsNumberString, IsOptional } from "class-validator";
 
-export class GetAllQueryDto {
+export class BasePaginationQueryDto {
   @IsNumberString()
   page: string = "1";
 

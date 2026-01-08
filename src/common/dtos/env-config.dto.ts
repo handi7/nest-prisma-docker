@@ -3,6 +3,8 @@ export class EnvConfig {
 
   CLIENT_URL: string;
 
+  PRISMA_LOGGING: string;
+
   DB_HOST: string;
   DB_PORT: number;
   DB_EXPOSE_PORT: number;

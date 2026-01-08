@@ -1,17 +1,14 @@
-import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { UpdateRoleDto } from "./dto/update-role.dto";
-import { PrismaService } from "../../services/prisma/prisma.service";
 import { SUPER_ADMIN_ROLE } from "src/common/decorators/super-admin.decorator";
 import { toRoleWithPermissions } from "./role.mapper";
-import {
-  buildOneValidationError,
-  buildValidationError,
-} from "src/common/helpers/validation-error.helper";
+import { buildOneValidationError } from "src/common/helpers/validation-error.helper";
+import { RoleRepository } from "./role.repository";
 
 @Injectable()
 export class RoleService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly roleRepo: RoleRepository) {}
 
   async create(dto: CreateRoleDto) {
     if (dto.name.toLowerCase() === SUPER_ADMIN_ROLE.toLowerCase()) {
@@ -21,15 +18,13 @@ export class RoleService {
       );
     }
 
-    const role = await this.prisma.role.findFirst({
-      where: { name: { equals: dto.name.toLowerCase(), mode: "insensitive" } },
-    });
+    const role = await this.roleRepo.findByName({ equals: dto.name, mode: "insensitive" });
 
     if (role) {
       throw buildOneValidationError<CreateRoleDto>("name", `${dto.name} role already exist`);
     }
 
-    const permissions = await this.prisma.permission.findMany();
+    const permissions = await this.roleRepo.findManyPermissions();
 
     const invalidPermissions = dto.permissions.filter((id) => {
       return !permissions.some((permission) => permission.id === id);
@@ -40,21 +35,21 @@ export class RoleService {
       throw buildOneValidationError<CreateRoleDto>("permissions", message);
     }
 
-    const newRole = await this.prisma.role.create({
-      data: {
+    const newRole = await this.roleRepo.create(
+      {
         name: dto.name,
         permissions: {
           create: dto.permissions.map((id) => ({ permission: { connect: { id } } })),
         },
       },
-      include: { permissions: { include: { permission: true } } },
-    });
+      { include: { permissions: { include: { permission: true } } } },
+    );
 
     return { message: "Role created successfully.", data: toRoleWithPermissions(newRole) };
   }
 
   findAll() {
-    return this.prisma.role.findMany({ where: { deleted_at: null } });
+    return this.roleRepo.findMany({ where: { deleted_at: null } });
   }
 
   update(id: number, updateRoleDto: UpdateRoleDto) {

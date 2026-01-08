@@ -1,12 +1,6 @@
 import { Role } from "src/types/Role";
-import { User } from "src/types/User";
 
-type RoleWithRelations = Role & {
-  permissions: { permission: any }[];
-  users?: User[];
-};
-
-export function toRoleWithPermissions({ permissions, ...role }: RoleWithRelations) {
+export function toRoleWithPermissions({ permissions, ...role }: Role) {
   return {
     ...role,
     permissions: permissions.map((permission) => permission.permission),
@@ -14,7 +8,7 @@ export function toRoleWithPermissions({ permissions, ...role }: RoleWithRelation
   };
 }
 
-export function toRoleWithPermissionNames({ permissions, ...role }: RoleWithRelations) {
+export function toRoleWithPermissionNames({ permissions, ...role }: Role) {
   return {
     ...role,
     permissionNames: permissions.map((permission) => permission.permission.name),

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { UserInviteService } from "./user-invite.service";
 import { CreateUserInviteDto } from "./dto/create-user-invite.dto";
-import { GetAllQueryDto } from "src/common/dtos/get-all-query.dto";
+import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
 import { AcceptInviteDto } from "./dto/accept-invite.dto";
 import { Public } from "src/common/decorators/public.decorator";
 import { Permissions } from "src/common/decorators/permissions.decorator";
@@ -18,14 +18,14 @@ export class UserInviteController {
 
   @Get("user-invites")
   @Permissions("view_user_invite")
-  findAll(@Query() query: GetAllQueryDto) {
+  findAll(@Query() query: BasePaginationQueryDto) {
     return this.userInviteService.findAll(query);
   }
 
   @Get("user-invite/:token")
   @Public()
   findOne(@Param("token") token: string) {
-    return this.userInviteService.findOne(token);
+    return this.userInviteService.findOneByToken(token);
   }
 
   @Post("user-invite/accept")

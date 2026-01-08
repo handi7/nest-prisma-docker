@@ -24,8 +24,18 @@ export class ResponseInterceptor implements NestInterceptor {
       map((data) => this.handleSuccess(request, response, data)),
 
       catchError((err) => {
-        const statusCode = err instanceof HttpException ? err.getStatus() : 500;
-        return throwError(() => new HttpException(err, statusCode));
+        if (err instanceof HttpException) {
+          return throwError(() => err);
+        }
+
+        return throwError(
+          () =>
+            new HttpException(
+              err?.message || 'Internal Server Error',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+              { cause: err },
+            ),
+        );
       }),
     );
   }
