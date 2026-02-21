@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "generated/prisma/client";
+import { createPrismaOptions } from "prisma/prisma.client";
 import { EnvConfig } from "src/common/dtos/env-config.dto";
 
 @Injectable()
@@ -9,15 +9,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly logger = new Logger("Prisma");
   private readonly isLoggingEnabled: boolean;
 
-  constructor(private readonly env: ConfigService<EnvConfig>) {
+  constructor(env: ConfigService<EnvConfig>) {
     const isLoggingEnabled = env.get<string>("PRISMA_LOGGING") === "true";
 
-    super({
-      adapter: new PrismaPg({
-        connectionString: env.get<string>("DATABASE_URL"),
+    super(
+      createPrismaOptions({
+        databaseUrl: env.get("DATABASE_URL"),
+        logging: isLoggingEnabled,
       }),
-      log: isLoggingEnabled ? [{ level: "query", emit: "event" }] : [],
-    });
+    );
 
     this.isLoggingEnabled = isLoggingEnabled;
   }

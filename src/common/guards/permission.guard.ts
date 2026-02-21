@@ -3,7 +3,7 @@ import { Reflector } from "@nestjs/core";
 import { ROLES_KEY } from "../decorators/super-admin.decorator";
 import { PERMISSIONS_KEY } from "../decorators/permissions.decorator";
 import { Request } from "express";
-import { PermissionsEnum } from "generated/prisma/enums";
+import { PermissionCode } from "src/config/permissions";
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -26,7 +26,7 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenException("Insufficient role");
     }
 
-    const requiredPermissions = check<PermissionsEnum[]>(PERMISSIONS_KEY) ?? [];
+    const requiredPermissions = check<PermissionCode[]>(PERMISSIONS_KEY) ?? [];
     const userPermissions = user.role.permissions.map((p) => p.permission.name);
     const isPermissed = requiredPermissions.some((perm) => userPermissions.includes(perm));
 

@@ -9,19 +9,19 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get("users")
-  @Permissions("view_user")
+  @Permissions("user.view")
   findAll(@Query() query: BasePaginationQueryDto) {
     return this.userService.findAll(query);
   }
 
   @Get("user/:id")
-  @Permissions("view_user")
+  @Permissions("user.view")
   findOne(@Param("id") id: string) {
     return this.userService.findOne(id);
   }
 
   @Patch("user/:id")
-  @Permissions("edit_user")
+  @Permissions("user.edit")
   update(@Param("id") id: string, @Body() dto: UpdateUserDto) {
     return this.userService.update(id, dto);
   }

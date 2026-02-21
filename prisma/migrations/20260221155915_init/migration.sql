@@ -1,5 +1,12 @@
--- CreateEnum
-CREATE TYPE "PermissionsEnum" AS ENUM ('view_user', 'edit_user', 'delete_user', 'create_user', 'view_role', 'edit_role', 'delete_role', 'create_role', 'view_user_invite', 'edit_user_invite', 'delete_user_invite', 'create_user_invite');
+-- CreateTable
+CREATE TABLE "seeders" (
+    "id" SERIAL NOT NULL,
+    "file_name" TEXT NOT NULL,
+    "checksum" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "seeders_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -42,8 +49,9 @@ CREATE TABLE "roles" (
 -- CreateTable
 CREATE TABLE "permissions" (
     "id" SERIAL NOT NULL,
-    "name" "PermissionsEnum" NOT NULL,
-    "label" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
 );
@@ -55,6 +63,9 @@ CREATE TABLE "role_permissions" (
 
     CONSTRAINT "role_permissions_pkey" PRIMARY KEY ("role_id","permission_id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "seeders_file_name_key" ON "seeders"("file_name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
@@ -69,7 +80,7 @@ CREATE UNIQUE INDEX "user_invites_token_key" ON "user_invites"("token");
 CREATE UNIQUE INDEX "roles_name_key" ON "roles"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "permissions_name_key" ON "permissions"("name");
+CREATE UNIQUE INDEX "permissions_code_key" ON "permissions"("code");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

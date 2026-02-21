@@ -13,6 +13,15 @@ datasource db {
   provider = "postgresql"
 }
 
+model Seeder {
+  id        Int      @id @default(autoincrement())
+  file_name String   @unique
+  checksum  String?
+  createdAt DateTime @default(now())
+
+  @@map("seeders")
+}
+
 model User {
   id         String    @id @default(uuid())
   name       String
@@ -56,10 +65,13 @@ model Role {
   @@map("roles")
 }
 
+
 model Permission {
-  id    Int              @id @default(autoincrement())
-  name  PermissionsEnum  @unique
-  label String
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  name       String
+  created_at DateTime @default(now())
+
   roles RolePermission[]
 
   @@map("permissions")
@@ -74,23 +86,4 @@ model RolePermission {
 
   @@id([role_id, permission_id])
   @@map("role_permissions")
-}
-
-// ===== ENUMS =====
-
-enum PermissionsEnum {
-  view_user
-  edit_user
-  delete_user
-  create_user
-
-  view_role
-  edit_role
-  delete_role
-  create_role
-
-  view_user_invite
-  edit_user_invite
-  delete_user_invite
-  create_user_invite
 }

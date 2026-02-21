@@ -1,7 +1,7 @@
 import { SetMetadata } from "@nestjs/common";
-import { PermissionsEnum } from "generated/prisma/enums";
+import { PermissionCode } from "src/config/permissions";
 
 export const PERMISSIONS_KEY = "permissions";
-export const Permissions = (...permissions: PermissionsEnum[]) => {
+export const Permissions = (...permissions: PermissionCode[]) => {
   return SetMetadata(PERMISSIONS_KEY, permissions);
 };

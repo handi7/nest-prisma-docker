@@ -11,13 +11,13 @@ export class UserInviteController {
   constructor(private readonly userInviteService: UserInviteService) {}
 
   @Post("user-invite")
-  @Permissions("create_user_invite")
+  @Permissions("user_invite.create")
   create(@Body() dto: CreateUserInviteDto) {
     return this.userInviteService.create(dto);
   }
 
   @Get("user-invites")
-  @Permissions("view_user_invite")
+  @Permissions("user_invite.view")
   findAll(@Query() query: BasePaginationQueryDto) {
     return this.userInviteService.findAll(query);
   }

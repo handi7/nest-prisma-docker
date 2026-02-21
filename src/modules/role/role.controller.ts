@@ -8,25 +8,25 @@ import { Permissions } from "src/common/decorators/permissions.decorator";
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
-  @Permissions("create_role")
+  @Permissions("role.create")
   @Post("role")
   create(@Body() dto: CreateRoleDto) {
     return this.roleService.create(dto);
   }
 
-  @Permissions("view_role")
+  @Permissions("role.view")
   @Get("roles")
   findAll() {
     return this.roleService.findAll();
   }
 
-  @Permissions("edit_role")
+  @Permissions("role.edit")
   @Patch("role/:id")
   update(@Param("id") id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.roleService.update(+id, updateRoleDto);
   }
 
-  @Permissions("delete_role")
+  @Permissions("role.delete")
   @Delete("role/:id")
   remove(@Param("id") id: string) {
     return this.roleService.remove(+id);
