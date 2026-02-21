@@ -60,7 +60,7 @@ export class AuthService {
     return user;
   }
 
-  async generateSession(user: any) {
+  async generateSession(user: User) {
     const { password: _, ...userData } = user;
 
     const jwtPayload = {
