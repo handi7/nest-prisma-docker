@@ -1,13 +1,13 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
   HttpException,
   UnauthorizedException,
-} from '@nestjs/common';
-import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { EnvConfig } from 'src/common/dtos/env-config.dto';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Response } from "express";
+import { EnvConfig } from "src/common/dtos/env-config.dto";
 
 @Catch(UnauthorizedException)
 export class GoogleAuthExceptionFilter implements ExceptionFilter {
@@ -16,11 +16,9 @@ export class GoogleAuthExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const clientUrl = this.configService.get('CLIENT_URL');
-    const message = exception.message || 'Authentication failed';
+    const clientUrl = this.configService.get("CLIENT_URL");
+    const message = exception.message || "Authentication failed";
 
-    response.redirect(
-      `${clientUrl}/login?error=${encodeURIComponent(message)}`,
-    );
+    response.redirect(`${clientUrl}/login?error=${encodeURIComponent(message)}`);
   }
 }

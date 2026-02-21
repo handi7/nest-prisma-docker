@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
+import { SUPER_ADMIN_ROLE } from "src/common/decorators/super-admin.decorator";
+import { buildOneValidationError } from "src/common/helpers/validation-error.helper";
+
 import { CreateRoleDto } from "./dto/create-role.dto";
 import { UpdateRoleDto } from "./dto/update-role.dto";
-import { SUPER_ADMIN_ROLE } from "src/common/decorators/super-admin.decorator";
+
 import { toRoleWithPermissions } from "./role.mapper";
-import { buildOneValidationError } from "src/common/helpers/validation-error.helper";
 import { RoleRepository } from "./role.repository";
 
 @Injectable()
@@ -52,7 +54,7 @@ export class RoleService {
     return this.roleRepo.findMany({ where: { deleted_at: null } });
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
+  update(id: number, _: UpdateRoleDto) {
     return `This action updates a #${id} role`;
   }
 

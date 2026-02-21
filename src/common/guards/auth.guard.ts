@@ -1,10 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
-import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
+import { RedisSession } from "src/common/dtos/redis-session.dto";
 import { PrismaService } from "src/services/prisma/prisma.service";
 import { RedisService } from "src/services/redis/redis.service";
-import { RedisSession } from "src/common/dtos/redis-session.dto";
+
+import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
 
 type AuthorizedRequest = Express.Request & { authorization: string };
 

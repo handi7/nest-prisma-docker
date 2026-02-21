@@ -1,8 +1,10 @@
-import { Controller, Get, Body, Patch, Param, Query } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { UpdateUserDto } from "./dto/update-user.dto";
+import { Body, Controller, Get, Param, Patch, Query } from "@nestjs/common";
 import { Permissions } from "src/common/decorators/permissions.decorator";
 import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
+
+import { UpdateUserDto } from "./dto/update-user.dto";
+
+import { UserService } from "./user.service";
 
 @Controller()
 export class UserController {

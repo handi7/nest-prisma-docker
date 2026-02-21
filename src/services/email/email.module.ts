@@ -1,10 +1,11 @@
-import { Global, Module, ModuleMetadata } from "@nestjs/common";
 import { MailerModule as NodemailerModule } from "@nestjs-modules/mailer";
-import { join } from "path";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { MailerAsyncOptions } from "@nestjs-modules/mailer/dist/interfaces/mailer-async-options.interface";
+import { Global, Module, ModuleMetadata } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { join } from "path";
 import { EnvConfig } from "src/common/dtos/env-config.dto";
+
 import { EmailService } from "./email.service";
 
 const mailerOptions: MailerAsyncOptions = {

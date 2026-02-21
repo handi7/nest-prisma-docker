@@ -1,23 +1,25 @@
 import {
-  Controller,
-  Post,
   Body,
-  HttpCode,
-  Req,
+  Controller,
   Get,
-  UseGuards,
+  HttpCode,
+  Post,
+  Req,
   Res,
   UseFilters,
+  UseGuards,
 } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { Public } from "src/common/decorators/public.decorator";
-import { LoginDto } from "./dto/login.dto";
-import { Request, Response } from "express";
-import { AuthGuard } from "@nestjs/passport";
 import { ConfigService } from "@nestjs/config";
+import { AuthGuard } from "@nestjs/passport";
+import { Request, Response } from "express";
+import { Public } from "src/common/decorators/public.decorator";
 import { EnvConfig } from "src/common/dtos/env-config.dto";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { GoogleAuthExceptionFilter } from "src/common/filters/google-auth.filter";
+
+import { LoginDto } from "./dto/login.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
+
+import { AuthService } from "./auth.service";
 
 @Controller("auth")
 export class AuthController {
@@ -42,13 +44,13 @@ export class AuthController {
   @Public()
   @Get("google")
   @UseGuards(AuthGuard("google"))
-  async googleAuth(@Req() req) {}
+  async googleAuth(@Req() _: Request) {}
 
   @Public()
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))
   @UseFilters(GoogleAuthExceptionFilter)
-  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     const { access_token, refresh_token, user } = await this.authService.generateSession(req.user);
 
     const clientUrl = this.configService.get("CLIENT_URL");

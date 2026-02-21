@@ -27,10 +27,7 @@ export interface PaginateResult<T> {
   meta: PaginateMeta;
 }
 
-export interface PrismaPaginateModel<
-  FindManyArgs extends { where?: any },
-  Entity,
-> {
+export interface PrismaPaginateModel<FindManyArgs extends { where?: any }, Entity> {
   findMany(args: FindManyArgs): Promise<Entity[]>;
-  count(where?: FindManyArgs['where']): Promise<number>;
+  count(where?: FindManyArgs["where"]): Promise<number>;
 }

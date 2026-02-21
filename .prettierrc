@@ -1,5 +1,22 @@
 {
   "semi": true,
   "trailingComma": "all",
-  "printWidth": 100
+  "printWidth": 100,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "^type$",
+    "^node:",
+    "^(react|next|@next)/",
+    "^(@?\\w)",
+    "^\\.\\.(?!/?$)",
+    "^\\./(?=.*/)(?!/?$)",
+    "^\\.(?!/?$)",
+    "^@/(.*)$",
+    "^\\u0000",
+    "^.+\\.module\\.(css|scss)$",
+    "^.+\\.(css|scss)$"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderParserPlugins": ["typescript", "decorators-legacy"]
 }

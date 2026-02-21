@@ -1,4 +1,5 @@
 import { PaginateOptions, PaginateResult, PrismaPaginateModel } from "src/types/Pagination";
+
 import { BasePaginationQueryDto } from "../dtos/base-pagination-query.dto";
 
 export async function paginate<

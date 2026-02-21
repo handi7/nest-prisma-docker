@@ -1,11 +1,13 @@
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
 import { Logger } from "@nestjs/common";
-import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { ConfigService } from "@nestjs/config";
+import { NestFactory } from "@nestjs/core";
+
 import { EnvConfig } from "./common/dtos/env-config.dto";
-import { CustomValidationPipe } from "./common/pipes/validation.pipe";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
+import { CustomValidationPipe } from "./common/pipes/validation.pipe";
+
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const logger = new Logger("APP");

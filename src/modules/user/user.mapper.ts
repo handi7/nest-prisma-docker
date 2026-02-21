@@ -1,4 +1,5 @@
 import { User } from "src/types/User";
+
 import { toRoleWithPermissionNames, toRoleWithPermissions } from "../role/role.mapper";
 
 export function toUserWithRoleAndPermissions(user: User) {

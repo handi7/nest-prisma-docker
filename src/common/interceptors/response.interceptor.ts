@@ -7,9 +7,10 @@ import {
   Logger,
   NestInterceptor,
 } from "@nestjs/common";
-import { catchError, map, Observable, throwError } from "rxjs";
 import { Request, Response } from "express";
 import { STATUS_CODES } from "http";
+import { Observable, catchError, map, throwError } from "rxjs";
+
 import { colorResponseCode, colorResponseTime } from "../helpers/ansi-color";
 
 @Injectable()
@@ -31,7 +32,7 @@ export class ResponseInterceptor implements NestInterceptor {
         return throwError(
           () =>
             new HttpException(
-              err?.message || 'Internal Server Error',
+              err?.message || "Internal Server Error",
               HttpStatus.INTERNAL_SERVER_ERROR,
               { cause: err },
             ),

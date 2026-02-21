@@ -1,14 +1,16 @@
 import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
-import { LoginDto } from "./dto/login.dto";
 import { JwtService } from "@nestjs/jwt";
 import { compareSync, genSalt, hash } from "bcryptjs";
-import { PrismaService } from "../../services/prisma/prisma.service";
-import { RedisService } from "../../services/redis/redis.service";
 import { RedisSession } from "src/common/dtos/redis-session.dto";
 import { User } from "src/types/User";
 import { v4 as uuidv4 } from "uuid";
+
 import { EmailService } from "../../services/email/email.service";
+import { PrismaService } from "../../services/prisma/prisma.service";
+import { RedisService } from "../../services/redis/redis.service";
 import { toRoleWithPermissionNames } from "../role/role.mapper";
+
+import { LoginDto } from "./dto/login.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Injectable()

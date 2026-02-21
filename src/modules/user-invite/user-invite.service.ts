@@ -1,17 +1,20 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateUserInviteDto } from "./dto/create-user-invite.dto";
-import { v4 as uuidv4 } from "uuid";
 import { ConfigService } from "@nestjs/config";
+import * as bcrypt from "bcryptjs";
+import { Prisma } from "generated/prisma/client";
+import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
 import { EnvConfig } from "src/common/dtos/env-config.dto";
 import { paginate, parsePaginationQuery } from "src/common/helpers/paginate";
-import { Prisma } from "generated/prisma/client";
-import * as bcrypt from "bcryptjs";
-import { AcceptInviteDto } from "./dto/accept-invite.dto";
 import { EmailService } from "src/services/email/email.service";
-import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
-import { UserInviteRepository } from "./user-invite.repository";
-import { UserRepository } from "../user/user.repository";
+import { v4 as uuidv4 } from "uuid";
+
 import { RoleRepository } from "../role/role.repository";
+import { UserRepository } from "../user/user.repository";
+
+import { AcceptInviteDto } from "./dto/accept-invite.dto";
+import { CreateUserInviteDto } from "./dto/create-user-invite.dto";
+
+import { UserInviteRepository } from "./user-invite.repository";
 
 @Injectable()
 export class UserInviteService {

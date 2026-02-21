@@ -1,7 +1,7 @@
 import {
-  Permission,
   Role as PRole,
   RolePermission as PRolePermission,
+  Permission,
   User,
 } from "generated/prisma/client";
 

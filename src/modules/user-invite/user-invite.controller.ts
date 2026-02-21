@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
-import { UserInviteService } from "./user-invite.service";
-import { CreateUserInviteDto } from "./dto/create-user-invite.dto";
-import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
-import { AcceptInviteDto } from "./dto/accept-invite.dto";
-import { Public } from "src/common/decorators/public.decorator";
 import { Permissions } from "src/common/decorators/permissions.decorator";
+import { Public } from "src/common/decorators/public.decorator";
+import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
+
+import { AcceptInviteDto } from "./dto/accept-invite.dto";
+import { CreateUserInviteDto } from "./dto/create-user-invite.dto";
+
+import { UserInviteService } from "./user-invite.service";
 
 @Controller()
 export class UserInviteController {

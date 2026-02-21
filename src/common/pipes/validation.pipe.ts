@@ -1,4 +1,4 @@
-import { Injectable, ValidationPipe, BadRequestException } from "@nestjs/common";
+import { BadRequestException, Injectable, ValidationPipe } from "@nestjs/common";
 import { ValidationError } from "class-validator";
 
 @Injectable()

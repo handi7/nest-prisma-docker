@@ -1,21 +1,22 @@
 import { Logger, MiddlewareConsumer, Module, OnApplicationBootstrap } from "@nestjs/common";
-import { PrismaService } from "./services/prisma/prisma.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { PrismaModule } from "./services/prisma/prisma.module";
-import { AuthModule } from "./modules/auth/auth.module";
-import { RoleModule } from "./modules/role/role.module";
-import { RedisModule } from "./services/redis/redis.module";
-import { UserInviteModule } from "./modules/user-invite/user-invite.module";
-import { UserModule } from "./modules/user/user.module";
-import { RequestTimerMiddleware } from "./common/middlewares/request-timer.middleware";
+import { APP_GUARD } from "@nestjs/core";
+import { JwtModule } from "@nestjs/jwt";
 import PermissionsSeeder from "prisma/seeders/PermissionsSeeder";
 import RoleSeeder from "prisma/seeders/RoleSeeder";
-import { EmailModule } from "./services/email/email.module";
-import { APP_GUARD } from "@nestjs/core";
+
+import { EnvConfig } from "./common/dtos/env-config.dto";
 import { AuthGuard } from "./common/guards/auth.guard";
 import { PermissionGuard } from "./common/guards/permission.guard";
-import { JwtModule } from "@nestjs/jwt";
-import { EnvConfig } from "./common/dtos/env-config.dto";
+import { RequestTimerMiddleware } from "./common/middlewares/request-timer.middleware";
+import { AuthModule } from "./modules/auth/auth.module";
+import { RoleModule } from "./modules/role/role.module";
+import { UserInviteModule } from "./modules/user-invite/user-invite.module";
+import { UserModule } from "./modules/user/user.module";
+import { EmailModule } from "./services/email/email.module";
+import { PrismaModule } from "./services/prisma/prisma.module";
+import { PrismaService } from "./services/prisma/prisma.service";
+import { RedisModule } from "./services/redis/redis.module";
 
 @Module({
   imports: [
