@@ -1,11 +1,15 @@
 import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { Permissions } from "src/common/decorators/permissions.decorator";
 import { Public } from "src/common/decorators/public.decorator";
+import { ZodSchema } from "src/common/decorators/zod-schema.decorator";
 import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
 
-import { AcceptInviteDto } from "./dto/accept-invite.dto";
-import { CreateUserInviteDto } from "./dto/create-user-invite.dto";
-
+import {
+  AcceptInviteDto,
+  AcceptInviteSchema,
+  CreateUserInviteDto,
+  CreateUserInviteSchema,
+} from "./user-invite.schema";
 import { UserInviteService } from "./user-invite.service";
 
 @Controller()
@@ -14,6 +18,7 @@ export class UserInviteController {
 
   @Post("user-invite")
   @Permissions("user_invite.create")
+  @ZodSchema(CreateUserInviteSchema)
   create(@Body() dto: CreateUserInviteDto) {
     return this.userInviteService.create(dto);
   }
@@ -32,6 +37,7 @@ export class UserInviteController {
 
   @Post("user-invite/accept")
   @Public()
+  @ZodSchema(AcceptInviteSchema)
   accept(@Body() dto: AcceptInviteDto) {
     return this.userInviteService.accept(dto);
   }

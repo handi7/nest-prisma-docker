@@ -1,13 +1,16 @@
 import { Logger, MiddlewareConsumer, Module, OnApplicationBootstrap } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { APP_GUARD } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import PermissionsSeeder from "prisma/seeders/PermissionsSeeder";
 import RoleSeeder from "prisma/seeders/RoleSeeder";
 
 import { EnvConfig } from "./common/dtos/env-config.dto";
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { AuthGuard } from "./common/guards/auth.guard";
 import { PermissionGuard } from "./common/guards/permission.guard";
+import { GlobalZodInterceptor } from "./common/interceptors/global-zod.interceptor";
+import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { RequestTimerMiddleware } from "./common/middlewares/request-timer.middleware";
 import { AuthModule } from "./modules/auth/auth.module";
 import { RoleModule } from "./modules/role/role.module";
@@ -50,6 +53,9 @@ import { RedisModule } from "./services/redis/redis.module";
   providers: [
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: PermissionGuard },
+    { provide: APP_INTERCEPTOR, useClass: GlobalZodInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    { provide: APP_FILTER, useClass: HttpExceptionFilter },
   ],
 })
 export class AppModule implements OnApplicationBootstrap {

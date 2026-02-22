@@ -2,11 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { SUPER_ADMIN_ROLE } from "src/common/decorators/super-admin.decorator";
 import { buildOneValidationError } from "src/common/helpers/validation-error.helper";
 
-import { CreateRoleDto } from "./dto/create-role.dto";
-import { UpdateRoleDto } from "./dto/update-role.dto";
-
 import { toRoleWithPermissions } from "./role.mapper";
 import { RoleRepository } from "./role.repository";
+import { CreateRoleDto, UpdateRoleDto } from "./role.schema";
 
 @Injectable()
 export class RoleService {

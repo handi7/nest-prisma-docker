@@ -1,17 +1,20 @@
-import { IsBooleanString, IsNumberString, IsOptional } from "class-validator";
+import z from "zod";
 
-export class BasePaginationQueryDto {
-  @IsNumberString()
-  page: string = "1";
+export const BasePaginationQuerySchema = z.object({
+  page: z
+    .string()
+    .default("1")
+    .transform((value) => parseInt(value) || 1),
+  limit: z
+    .string()
+    .optional()
+    .transform((value) => parseInt(value) || 10),
+  search: z.string().default(""),
+  sortBy: z.string(),
+  desc: z
+    .string()
+    .default("false")
+    .transform((value) => value === "true"),
+});
 
-  @IsNumberString()
-  @IsOptional()
-  limit: string;
-
-  search: string = "";
-
-  sortBy: string;
-
-  @IsBooleanString()
-  desc: string = "false";
-}
+export type BasePaginationQueryDto = z.infer<typeof BasePaginationQuerySchema>;

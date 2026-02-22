@@ -13,12 +13,11 @@ import { ConfigService } from "@nestjs/config";
 import { AuthGuard } from "@nestjs/passport";
 import { Request, Response } from "express";
 import { Public } from "src/common/decorators/public.decorator";
+import { ZodSchema } from "src/common/decorators/zod-schema.decorator";
 import { EnvConfig } from "src/common/dtos/env-config.dto";
 import { GoogleAuthExceptionFilter } from "src/common/filters/google-auth.filter";
 
-import { LoginDto } from "./dto/login.dto";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
-
+import { LoginDto, LoginSchema, ResetPasswordDto, ResetPasswordSchema } from "./auth.schema";
 import { AuthService } from "./auth.service";
 
 @Controller("auth")
@@ -31,6 +30,7 @@ export class AuthController {
   @Public()
   @Post("login")
   @HttpCode(200)
+  @ZodSchema(LoginSchema)
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
@@ -71,7 +71,8 @@ export class AuthController {
   @Public()
   @Post("reset-password")
   @HttpCode(200)
-  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(resetPasswordDto);
+  @ZodSchema(ResetPasswordSchema)
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }

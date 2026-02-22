@@ -10,8 +10,7 @@ import { PrismaService } from "../../services/prisma/prisma.service";
 import { RedisService } from "../../services/redis/redis.service";
 import { toRoleWithPermissionNames } from "../role/role.mapper";
 
-import { LoginDto } from "./dto/login.dto";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { LoginDto, ResetPasswordDto } from "./auth.schema";
 
 @Injectable()
 export class AuthService {

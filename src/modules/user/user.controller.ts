@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, Patch, Query } from "@nestjs/common";
 import { Permissions } from "src/common/decorators/permissions.decorator";
+import { ZodSchema } from "src/common/decorators/zod-schema.decorator";
 import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
 
-import { UpdateUserDto } from "./dto/update-user.dto";
-
+import { UpdateUserDto, UpdateUserSchema } from "./user.schema";
 import { UserService } from "./user.service";
 
 @Controller()
@@ -24,6 +24,7 @@ export class UserController {
 
   @Patch("user/:id")
   @Permissions("user.edit")
+  @ZodSchema(UpdateUserSchema)
   update(@Param("id") id: string, @Body() dto: UpdateUserDto) {
     return this.userService.update(id, dto);
   }

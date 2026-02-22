@@ -4,6 +4,7 @@ export class EnvConfig {
   CLIENT_URL: string;
 
   PRISMA_LOGGING: string;
+  VALIDATION_LOGGING: string;
 
   DB_HOST: string;
   DB_PORT: number;

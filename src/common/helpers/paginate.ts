@@ -101,11 +101,11 @@ export function parsePaginationQuery<Entity>(
   overrides?: Partial<PaginateOptions<Entity>>,
 ): PaginateOptions<Entity> {
   return {
-    page: query.page ? Number(query.page) : 1,
-    limit: query.limit ? Number(query.limit) : 10,
+    page: query.page,
+    limit: query.limit,
     search: query.search,
     sortBy: query.sortBy,
-    desc: query.desc === "true",
+    desc: query.desc,
     ...overrides,
   };
 }

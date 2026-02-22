@@ -23,12 +23,13 @@ export class PermissionGuard implements CanActivate {
     }
 
     const requiredRoles = check<string[]>(ROLES_KEY) ?? [];
+
     if (Boolean(requiredRoles.length) && !requiredRoles.includes(user.role.name)) {
       throw new ForbiddenException("Insufficient role");
     }
 
     const requiredPermissions = check<PermissionCode[]>(PERMISSIONS_KEY) ?? [];
-    const userPermissions = user.role.permissions.map((p) => p.permission.name);
+    const userPermissions = user.role.permissions.map((p) => p.permission.code);
     const isPermissed = requiredPermissions.some((perm) => userPermissions.includes(perm));
 
     if (Boolean(requiredPermissions.length) && !isPermissed) {

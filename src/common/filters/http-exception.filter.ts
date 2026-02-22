@@ -1,12 +1,16 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { Request, Response } from "express";
 import { STATUS_CODES } from "http";
 
+import { EnvConfig } from "../dtos/env-config.dto";
 import { colorResponseTime } from "../helpers/ansi-color";
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   private logger = new Logger();
+
+  constructor(private env: ConfigService<EnvConfig>) {}
 
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -29,22 +33,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
       this.logger.error(logMessage, exception.stack, request.method);
     } else this.logger.error(logMessage, request.method);
 
-    const isErrorValidation = Boolean(exceptionResponse?.response?.validation);
-
-    if (isErrorValidation && !request.originalUrl.startsWith("/auth")) {
-      this.logger.error(exceptionResponse?.response, "Validation");
-    }
-
     const errorMessage =
-      status === 500
-        ? "Internal Server Error"
-        : exceptionResponse?.response?.message || exception.message;
+      status === 500 ? "Internal Server Error" : exceptionResponse?.message || exception.message;
 
     const error = {
       type:
         STATUS_CODES?.[status] || exceptionResponse.response?.error || exception.name || "Error",
-      errors: exceptionResponse?.response?.validation || null,
+      errors: null,
     };
+
+    const isErrorValidation = Boolean(exceptionResponse?.validation);
+
+    if (isErrorValidation) {
+      const isLoggingActive = this.env.get("VALIDATION_LOGGING") === "true";
+      if (!request.originalUrl.startsWith("/auth") && isLoggingActive) {
+        this.logger.error(exceptionResponse.validation, "Validation");
+      }
+
+      error.errors = exceptionResponse.validation;
+    }
 
     const responseData = {
       method: request.method,
