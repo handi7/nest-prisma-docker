@@ -42,7 +42,9 @@ export class RoleService {
           create: dto.permissions.map((id) => ({ permission: { connect: { id } } })),
         },
       },
-      { include: { permissions: { include: { permission: true } } } },
+      {
+        include: { permissions: { include: { permission: true } } },
+      },
     );
 
     return { message: "Role created successfully.", data: toRoleWithPermissions(newRole) };

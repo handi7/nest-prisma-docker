@@ -1,36 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { Permission, Prisma, Role } from "generated/prisma/client";
+import { BaseRepository } from "src/common/base/base.repository";
 import { PrismaService } from "src/services/prisma/prisma.service";
 
 @Injectable()
-export class RoleRepository {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async create<T extends Role>(
-    data: Prisma.RoleCreateInput,
-    args?: Omit<Prisma.RoleCreateArgs, "data">,
-  ): Promise<T> {
-    const role = await this.prisma.role.create({ ...args, data });
-
-    return role as T;
-  }
-
-  update(
-    id: number,
-    data: Prisma.RoleUpdateInput,
-    options?: Omit<Prisma.RoleUpdateArgs, "where" | "data">,
-  ): Promise<Role> {
-    return this.prisma.role.update({
-      where: { id },
-      data,
-      ...options,
-    });
-  }
-
-  findById(id: number): Promise<Role | null> {
-    return this.prisma.role.findUnique({
-      where: { id },
-    });
+export class RoleRepository extends BaseRepository<
+  PrismaService["role"],
+  Role,
+  Prisma.RoleWhereInput,
+  Prisma.RoleWhereUniqueInput,
+  Prisma.RoleCreateInput,
+  Prisma.RoleUpdateInput,
+  Prisma.RoleOrderByWithRelationInput,
+  Prisma.RoleInclude,
+  Prisma.RoleSelect
+> {
+  constructor(prisma: PrismaService) {
+    super(prisma, prisma.role);
   }
 
   findByName(name: Prisma.RoleFindFirstArgs["where"]["name"]): Promise<Role | null> {
@@ -39,19 +25,7 @@ export class RoleRepository {
     });
   }
 
-  findMany(args: Prisma.RoleFindManyArgs): Promise<Role[]> {
-    return this.prisma.role.findMany(args);
-  }
-
   findManyPermissions(args?: Prisma.PermissionFindManyArgs): Promise<Permission[]> {
     return this.prisma.permission.findMany(args);
-  }
-
-  count(where: Prisma.RoleWhereInput): Promise<number> {
-    return this.prisma.role.count({ where });
-  }
-
-  delete(id: number): Promise<Role> {
-    return this.prisma.role.delete({ where: { id } });
   }
 }

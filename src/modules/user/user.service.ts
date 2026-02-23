@@ -54,7 +54,7 @@ export class UserService {
       throw new NotFoundException(`User not found`);
     }
 
-    const updatedUser = await this.userRepo.update(id, dto, {
+    const updatedUser = await this.userRepo.updateById(id, dto, {
       include: {
         role: {
           include: {
