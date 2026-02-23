@@ -20,6 +20,7 @@ import { EmailModule } from "./services/email/email.module";
 import { PrismaModule } from "./services/prisma/prisma.module";
 import { PrismaService } from "./services/prisma/prisma.service";
 import { RedisModule } from "./services/redis/redis.module";
+import { S3Module } from "./services/s3/s3.module";
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { RedisModule } from "./services/redis/redis.module";
     PrismaModule,
     RedisModule,
     EmailModule,
+    S3Module,
 
     // Feature Modules
     AuthModule,

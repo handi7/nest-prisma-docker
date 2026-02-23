@@ -21,6 +21,12 @@ export class EnvConfig {
   REDIS_EXPOSE_PORT: number;
   REDIS_PASSWORD: string;
 
+  S3_ENDPOINT: string;
+  S3_REGION: string;
+  S3_ACCESS_KEY: string;
+  S3_SECRET_KEY: string;
+  S3_BUCKET: string;
+
   JWT_SECRET: string;
   JWT_EXPIRATION_TIME: string;
 
