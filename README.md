@@ -1,152 +1,188 @@
 # NestJS Prisma Docker Boilerplate
 
-A robust boilerplate for building scalable backend applications using **NestJS**, **Prisma**, and **PostgreSQL**, fully containerized with **Docker**.
+Backend boilerplate built with NestJS, Prisma, and PostgreSQL, with Docker-first development and shared infrastructure for Redis, email, and S3-compatible file storage.
 
-## 🚀 Features
+## Features
 
-- **NestJS**: A progressive Node.js framework for building efficient and scalable server-side applications.
-- **Prisma ORM**: Next-generation Node.js and TypeScript ORM for PostgreSQL.
-- **PostgreSQL**: Powerful, open source object-relational database system.
-- **Docker & Docker Compose**: Containerization for consistent development and production environments.
-- **Authentication**:
-  - JWT (JSON Web Token) Authentication.
-  - Google OAuth2 Integration.
-  - Role-Based Access Control (RBAC) with Permissions.
-- **User Management**:
-  - User Registration & Login.
-  - Password Reset Flow (Email-based).
-  - User Invitation System.
-- **Validation**: Request validation using `class-validator` and `class-transformer`.
-- **Email Service**: Integrated email sending capabilities (using `nodemailer`).
+- JWT authentication with refresh-token sessions stored in Redis.
+- Google OAuth flow endpoints and callback redirect support.
+- RBAC with roles and permission codes.
+- User invite flow (create invite, validate token, accept invite).
+- Forgot password and reset password via email templates.
+- Prisma ORM with migration and seeding support.
+- Global response envelope and centralized HTTP error formatting.
+- Request validation using Zod schemas via custom interceptor.
+- S3-compatible file utilities (upload, signed/public URL, delete).
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- [NestJS](https://nestjs.com/)
-- [Prisma](https://www.prisma.io/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [Docker](https://www.docker.com/)
-- [Passport](http://www.passportjs.org/)
-- [RxJS](https://rxjs.dev/)
+- NestJS 10
+- Prisma 7 + PostgreSQL
+- Redis (ioredis)
+- AWS SDK S3 client (works with S3-compatible providers like MinIO)
+- Nodemailer via `@nestjs-modules/mailer` + Handlebars templates
+- Docker + Docker Compose
 
-## 📂 Project Structure
+## Project Structure
 
-```
+```text
 nest-prisma-docker/
-├── prisma/              # Prisma schema and migrations
+├── prisma/                 # Prisma schema, migrations, seeders
+├── generated/prisma/       # Generated Prisma client output
 ├── src/
-│   ├── common/          # Shared decorators, filters, guards, etc.
-│   ├── modules/         # Application modules (Auth, User, Role, etc.)
-│   ├── services/        # Shared services (Email, etc.)
-│   ├── types/           # Custom type definitions
-│   ├── app.module.ts    # Main application module
-│   └── main.ts          # Application entry point
-├── test/                # E2E tests
-├── Dockerfile           # Docker configuration for the app
-├── docker-compose.yml   # Docker Compose configuration
-└── package.json         # Dependencies and scripts
+│   ├── common/             # Decorators, guards, filters, interceptors, helpers
+│   ├── config/             # Permission constants
+│   ├── modules/            # Feature modules: auth, role, user, user-invite
+│   ├── services/           # Infra services: prisma, redis, email, s3
+│   ├── app.module.ts       # Root module
+│   └── main.ts             # Bootstrap
+├── test/                   # E2E setup
+├── Dockerfile
+├── docker-compose.yml
+└── package.json
 ```
 
-## ⚡ Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18+ recommended)
-- [Docker](https://www.docker.com/) & Docker Compose
-- [Yarn](https://yarnpkg.com/) (optional, but recommended)
+- Node.js 20+
+- Yarn
+- Docker and Docker Compose (recommended)
 
-### Environment Setup
-
-1.  Clone the repository.
-2.  Copy the example environment file:
-    ```bash
-    cp .env.example .env
-    ```
-3.  Update `.env` with your configuration (Database credentials, JWT secret, Email settings, etc.).
-
-### Running with Docker (Recommended)
-
-Start the application and database containers:
+### 1) Environment Setup
 
 ```bash
-# Development mode
-yarn dev:d
-# OR
-npm run dev:d
+cp .env.example .env
 ```
 
-This command will:
+Fill required values in `.env`, especially DB/Redis/JWT/email and default admin credentials.
 
-1.  Generate Prisma client.
-2.  Build and start the containers.
-3.  Watch for file changes.
+### 2) Run with Docker (Recommended)
 
-To stop the containers and remove volumes:
+```bash
+yarn dev:d
+```
+
+This starts app + PostgreSQL + Redis with build.
+
+To clean containers/volumes and rebuild:
 
 ```bash
 yarn dev-clean:d
-# OR
-npm run dev-clean:d
 ```
 
-### Running Locally
+### 3) Run Locally
 
-1.  Install dependencies:
+1. Install dependencies:
 
-    ```bash
-    yarn install
-    ```
+```bash
+yarn
+```
 
-2.  Start the database (you can use the docker-compose file just for the DB if you wish, or a local Postgres instance).
+2. Ensure PostgreSQL and Redis are running.
 
-3.  Run migrations and generate Prisma client:
+3. Run migrations and generate Prisma client:
 
-    ```bash
-    yarn migrate
-    yarn generate
-    ```
+```bash
+yarn migrate
+yarn generate
+```
 
-4.  Start the application:
+4. (Optional but recommended) run seeders:
 
-    ```bash
-    # Development
-    yarn start:dev
+```bash
+yarn seed
+```
 
-    # Production
-    yarn start:prod
-    ```
+5. Start app in dev mode:
 
-## 📜 Scripts
+```bash
+yarn dev
+```
 
-| Script           | Description                                 |
-| :--------------- | :------------------------------------------ |
-| `yarn start:dev` | Starts the app in watch mode.               |
-| `yarn dev:d`     | Starts the app and DB in Docker (dev mode). |
-| `yarn migrate`   | Runs Prisma migrations.                     |
-| `yarn generate`  | Generates Prisma client.                    |
-| `yarn test`      | Runs unit tests.                            |
-| `yarn test:e2e`  | Runs end-to-end tests.                      |
-| `yarn lint`      | Lints the codebase.                         |
+App listens on `APP_PORT` (default in code fallback is `2000`).
 
-## 🛡️ Authentication & RBAC
+## Available Scripts
 
-The application uses **Passport** for authentication strategies.
+| Script              | Description                                  |
+| :------------------ | :------------------------------------------- |
+| `yarn dev`          | Start Nest app in watch mode                 |
+| `yarn dev:generate` | Generate Prisma client then start watch mode |
+| `yarn build`        | Build app to `dist`                          |
+| `yarn start:prod`   | Generate Prisma client then run built app    |
+| `yarn generate`     | Generate Prisma client                       |
+| `yarn migrate`      | Run Prisma migrate dev                       |
+| `yarn seed`         | Execute Prisma seeders                       |
+| `yarn dev:d`        | Docker dev startup (build + up)              |
+| `yarn dev-clean:d`  | Docker cleanup + rebuild + up                |
+| `yarn prod:d`       | Docker production target                     |
+| `yarn test`         | Run unit tests                               |
+| `yarn test:e2e`     | Run e2e tests                                |
+| `yarn lint`         | Lint and fix                                 |
 
-- **JWT Strategy**: Used for protecting API endpoints.
-- **Google Strategy**: Used for OAuth2 login.
+## API Overview
 
-**RBAC (Role-Based Access Control)** is implemented using `Roles` and `Permissions`.
+### Auth
 
-- **Roles**: Define a set of permissions (e.g., Admin, User).
-- **Permissions**: Granular access rights (e.g., `create_user`, `view_role`).
+- `POST /auth/login`
+- `POST /auth/refresh-token`
+- `GET /auth/google`
+- `GET /auth/google/callback`
+- `POST /auth/forgot-password`
+- `POST /auth/reset-password`
 
-## 📧 Email Service
+### User
 
-The project includes an email service for sending transactional emails (e.g., password reset, welcome emails). Ensure you configure the `MAIL_*` environment variables in `.env`.
+- `GET /users`
+- `GET /user/:id`
+- `PATCH /user/:id`
 
-## 🤝 Contributing
+### Role
 
-Contributions are welcome! Please fork the repository and submit a pull request.
+- `POST /role`
+- `GET /roles`
+- `PATCH /role/:id`
+- `DELETE /role/:id`
 
-## 📄 License
+### User Invite
 
-This project is licensed under the MIT License.
+- `POST /user-invite`
+- `GET /user-invites`
+- `GET /user-invite/:token` (public)
+- `POST /user-invite/accept` (public)
+
+## Response and Validation Behavior
+
+- Successful responses are wrapped by a global response interceptor with metadata fields such as `success`, `statusCode`, `message`, `data`, and `meta`.
+- HTTP errors are normalized by a global exception filter with `success: false` and structured `error` payload.
+- Request-body validation for selected endpoints is done with Zod schemas (`@ZodSchema(...)`), not `class-validator`.
+
+## RBAC and Seeding
+
+- Permissions are defined in `src/config/permissions.ts`.
+- On application bootstrap, permission and role seeders run to sync core RBAC data.
+- `yarn seed` runs full seeders including initial super admin user creation.
+- Required env for super admin seeding: `MAIN_USER_EMAIL`, `MAIN_USER_PASSWORD`, `MAIN_USER_NAME`.
+
+## Environment Variables
+
+Use `.env.example` as baseline. Key variables:
+
+- App: `APP_PORT`, `CLIENT_URL`, `ORIGIN`
+- Database: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DATABASE_URL`
+- Redis: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
+- Auth: `JWT_SECRET`, `JWT_EXPIRATION_TIME`, `BCRYPT_ROUNDS`
+- Email: `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`
+- Google OAuth: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL`
+- S3: `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`
+
+## Current Limitations
+
+- `PATCH /role/:id` and `DELETE /role/:id` handlers are placeholders in service logic.
+- `UpdateUserSchema` is currently empty, so user update validation is not yet defined.
+- Google strategy file exists, but strategy provider wiring in auth module should be reviewed before relying on OAuth in production.
+
+## License
+
+MIT
