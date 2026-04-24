@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 import { Prisma } from "generated/prisma/client";
 import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
 import { EnvConfig } from "src/common/dtos/env-config.dto";
 import { paginate, parsePaginationQuery } from "src/common/helpers/paginate";
 import { EmailService } from "src/services/email/email.service";
-import { v4 as uuidv4 } from "uuid";
 
 import { RoleRepository } from "../role/role.repository";
 import { UserRepository } from "../user/user.repository";
@@ -33,7 +33,7 @@ export class UserInviteService {
       throw new BadRequestException("User with this email already exists");
     }
 
-    const token = uuidv4();
+    const token = randomUUID();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 

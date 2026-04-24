@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { compareSync, genSalt, hash } from "bcryptjs";
+import { randomUUID } from "crypto";
 import { RedisSession } from "src/common/dtos/redis-session.dto";
 import { User } from "src/types/User";
-import { v4 as uuidv4 } from "uuid";
 
 import { EmailService } from "../../services/email/email.service";
 import { PrismaService } from "../../services/prisma/prisma.service";
@@ -136,7 +136,7 @@ export class AuthService {
       throw new BadRequestException("User not found");
     }
 
-    const token = uuidv4();
+    const token = randomUUID();
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour expiration
 

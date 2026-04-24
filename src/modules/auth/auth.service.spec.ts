@@ -1,4 +1,8 @@
+import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
+import { EmailService } from "src/services/email/email.service";
+import { PrismaService } from "src/services/prisma/prisma.service";
+import { RedisService } from "src/services/redis/redis.service";
 
 import { AuthService } from "./auth.service";
 
@@ -7,7 +11,13 @@ describe("AuthService", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
+      providers: [
+        AuthService,
+        { provide: PrismaService, useValue: {} },
+        { provide: JwtService, useValue: { sign: jest.fn() } },
+        { provide: RedisService, useValue: { get: jest.fn(), set: jest.fn(), del: jest.fn() } },
+        { provide: EmailService, useValue: { sendResetPassword: jest.fn() } },
+      ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);

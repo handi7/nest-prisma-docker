@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
 import { Permissions } from "src/common/decorators/permissions.decorator";
-import { ZodSchema } from "src/common/decorators/zod-schema.decorator";
+import { ZodBody } from "src/common/decorators/zod-body.decorator";
 
 import { CreateRoleDto, CreateRoleSchema, UpdateRoleDto, UpdateRoleSchema } from "./role.schema";
 import { RoleService } from "./role.service";
@@ -11,8 +11,7 @@ export class RoleController {
 
   @Permissions("role.create")
   @Post("role")
-  @ZodSchema(CreateRoleSchema)
-  create(@Body() dto: CreateRoleDto) {
+  create(@ZodBody(CreateRoleSchema) dto: CreateRoleDto) {
     return this.roleService.create(dto);
   }
 
@@ -24,8 +23,7 @@ export class RoleController {
 
   @Permissions("role.edit")
   @Patch("role/:id")
-  @ZodSchema(UpdateRoleSchema)
-  update(@Param("id") id: string, @Body() dto: UpdateRoleDto) {
+  update(@Param("id") id: string, @ZodBody(UpdateRoleSchema) dto: UpdateRoleDto) {
     return this.roleService.update(+id, dto);
   }
 

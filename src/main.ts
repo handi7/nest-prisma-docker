@@ -12,7 +12,12 @@ async function bootstrap() {
 
   const env = app.get<ConfigService<EnvConfig>>(ConfigService);
 
-  const port = env.get("APP_PORT") || 2000;
+  const port = env.get("APP_PORT");
+  const clientUrl = env.get<string>("CLIENT_URL");
+  const origin = env.get<string>("ORIGIN");
+  const allowedOrigins = [...origin.split(","), clientUrl];
+
+  app.enableCors({ origin: allowedOrigins });
 
   await app.listen(port, () => logger.log(`Running at port: ${port}`));
 }

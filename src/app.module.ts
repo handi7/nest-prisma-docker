@@ -5,11 +5,10 @@ import { JwtModule } from "@nestjs/jwt";
 import PermissionsSeeder from "prisma/seeders/PermissionsSeeder";
 import RoleSeeder from "prisma/seeders/RoleSeeder";
 
-import { EnvConfig } from "./common/dtos/env-config.dto";
+import { EnvConfig, EnvSchema } from "./common/dtos/env-config.dto";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { AuthGuard } from "./common/guards/auth.guard";
 import { PermissionGuard } from "./common/guards/permission.guard";
-import { GlobalZodInterceptor } from "./common/interceptors/global-zod.interceptor";
 import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 import { RequestTimerMiddleware } from "./common/middlewares/request-timer.middleware";
 import { AuthModule } from "./modules/auth/auth.module";
@@ -27,7 +26,7 @@ import { S3Module } from "./services/s3/s3.module";
     // Core Modules
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [() => process.env],
+      validate: (config) => EnvSchema.parse(config),
     }),
     JwtModule.registerAsync({
       global: true,
@@ -55,8 +54,9 @@ import { S3Module } from "./services/s3/s3.module";
   providers: [
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: PermissionGuard },
-    { provide: APP_INTERCEPTOR, useClass: GlobalZodInterceptor },
+
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
   ],
 })

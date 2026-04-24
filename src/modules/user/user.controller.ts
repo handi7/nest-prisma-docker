@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Patch, Query } from "@nestjs/common";
+import { Controller, Get, Param, Patch } from "@nestjs/common";
 import { Permissions } from "src/common/decorators/permissions.decorator";
-import { ZodSchema } from "src/common/decorators/zod-schema.decorator";
+import { ZodBody } from "src/common/decorators/zod-body.decorator";
+import { ZodQuery } from "src/common/decorators/zod-query.decorator";
 import { BasePaginationQueryDto } from "src/common/dtos/base-pagination-query.dto";
 
 import { UpdateUserDto, UpdateUserSchema } from "./user.schema";
@@ -12,7 +13,7 @@ export class UserController {
 
   @Get("users")
   @Permissions("user.view")
-  findAll(@Query() query: BasePaginationQueryDto) {
+  findAll(@ZodQuery() query: BasePaginationQueryDto) {
     return this.userService.findAll(query);
   }
 
@@ -24,8 +25,7 @@ export class UserController {
 
   @Patch("user/:id")
   @Permissions("user.edit")
-  @ZodSchema(UpdateUserSchema)
-  update(@Param("id") id: string, @Body() dto: UpdateUserDto) {
+  update(@Param("id") id: string, @ZodBody(UpdateUserSchema) dto: UpdateUserDto) {
     return this.userService.update(id, dto);
   }
 }

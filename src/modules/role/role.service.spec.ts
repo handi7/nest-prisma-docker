@@ -1,5 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 
+import { RoleRepository } from "./role.repository";
 import { RoleService } from "./role.service";
 
 describe("RoleService", () => {
@@ -7,7 +8,7 @@ describe("RoleService", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RoleService],
+      providers: [RoleService, { provide: RoleRepository, useValue: {} }],
     }).compile();
 
     service = module.get<RoleService>(RoleService);
