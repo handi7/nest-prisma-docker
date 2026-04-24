@@ -70,7 +70,7 @@ export class AppModule implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
-    this.logger.log("Application is bootstrapping...");
+    this.logger.log("Application is bootstrapping...\n");
 
     await PermissionsSeeder(this.prisma);
     await RoleSeeder(this.prisma);

@@ -1,13 +1,17 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { createHash } from "crypto";
+import "dotenv/config";
 import { PrismaClient } from "generated/prisma/client";
-import { createPrismaOptions } from "./prisma.client";
+
 import { seeders } from "./seeders";
 
-export type SeederFunc = (prisma: PrismaClient) => Promise<void>;
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+});
 
-const prisma = new PrismaClient(createPrismaOptions({ logging: true }));
+export type Seeder = (prisma: PrismaClient) => Promise<void>;
 
-async function runSeeder(seeder: SeederFunc) {
+async function runSeeder(seeder: Seeder) {
   const checksum = createHash("md5").update(seeder.toString()).digest("hex");
 
   const exists = await prisma.seeder.findUnique({

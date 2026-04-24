@@ -1,7 +1,7 @@
-import { PrismaClient } from "generated/prisma/client";
-import UsersSeeder from "./UsersSeeder";
+import { Seeder } from "../seed";
+
 import PermissionsSeeder from "./PermissionsSeeder";
 import RoleSeeder from "./RoleSeeder";
-import { SeederFunc } from "../seed";
+import UsersSeeder from "./UsersSeeder";
 
-export const seeders: SeederFunc[] = [PermissionsSeeder, RoleSeeder, UsersSeeder];
+export const seeders: Seeder[] = [PermissionsSeeder, RoleSeeder, UsersSeeder];
