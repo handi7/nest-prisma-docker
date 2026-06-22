@@ -14,7 +14,7 @@ export async function paginate<
 >(
   model: PrismaPaginateModel<FindManyArgs, Entity>,
   baseArgs: FindManyArgs,
-  options: PaginateOptions<Entity> = {},
+  options: PaginateOptions = {},
   mapper?: (item: Entity) => Mapped,
 ): Promise<PaginateResult<Mapped>> {
   const {
@@ -25,15 +25,16 @@ export async function paginate<
     sortBy,
     desc = false,
     allowedSortBy = [],
+    stableSortBy = [],
   } = options;
 
-  const safePage = Math.max(page, 1);
-  const safeLimit = Math.min(Math.max(limit, 1), 100); // anti abuse
+  const safePage = Number.isFinite(Number(page)) ? Math.max(Number(page), 1) : 1;
+  const safeLimit = Number.isFinite(Number(limit)) ? Math.min(Math.max(Number(limit), 1), 100) : 10;
 
   const where = { ...(baseArgs.where || {}) };
 
   // 🔍 SEARCH
-  const searchWhere = buildSearchWhere<Entity>(search ?? "", searchFields);
+  const searchWhere = buildSearchWhere(search ?? "", searchFields);
   if (searchWhere) {
     where.AND = where.AND
       ? [...(Array.isArray(where.AND) ? where.AND : [where.AND]), searchWhere]
@@ -41,10 +42,23 @@ export async function paginate<
   }
 
   // ↕️ SORT
+  const normalizedSortBy = sortBy?.trim();
   const isSortAllowed =
-    sortBy && allowedSortBy.length ? allowedSortBy.includes(sortBy as keyof Entity) : false;
+    !!normalizedSortBy && (allowedSortBy.length ? allowedSortBy.includes(normalizedSortBy) : true);
+  const direction: "asc" | "desc" = desc ? "desc" : "asc";
 
-  const orderBy = isSortAllowed ? [{ [sortBy!]: desc ? "desc" : "asc" }] : (baseArgs.orderBy ?? []);
+  const sortFields = [
+    ...(isSortAllowed && normalizedSortBy ? [normalizedSortBy] : []),
+    ...stableSortBy,
+  ];
+
+  const uniqueSortFields = [...new Set(sortFields)];
+
+  const builtOrderBy = uniqueSortFields
+    .map((field) => buildOrderByFromPath(field, direction))
+    .filter(Boolean);
+
+  const orderBy = builtOrderBy.length ? [...builtOrderBy, { id: "asc" }] : (baseArgs.orderBy ?? []);
 
   const skip = (safePage - 1) * safeLimit;
   const take = safeLimit;
@@ -67,42 +81,87 @@ export async function paginate<
   return {
     data: mapped,
     meta: {
-      total,
-      totalPages,
-      page: safePage,
-      limit: safeLimit,
-      prevPage: safePage > 1 ? safePage - 1 : null,
-      nextPage: safePage < totalPages ? safePage + 1 : null,
-      search,
-      sortBy: isSortAllowed ? sortBy! : null,
-      desc,
+      pagination: {
+        total,
+        totalPages,
+        page: safePage,
+        limit: safeLimit,
+        prevPage: safePage > 1 ? safePage - 1 : null,
+        nextPage: safePage < totalPages ? safePage + 1 : null,
+        search,
+        sortBy: isSortAllowed && normalizedSortBy ? normalizedSortBy : null,
+        desc,
+      },
     },
   };
 }
 
-function buildSearchWhere<Entity>(
-  search: string,
-  fields: (keyof Entity)[],
-): Record<string, any> | undefined {
+function buildOrderByFromPath(fieldPath: string, direction: "asc" | "desc") {
+  const keys = fieldPath
+    .split(".")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (!keys.length) {
+    return null;
+  }
+
+  return keys.reduceRight<any>((acc, key, index) => {
+    if (index === keys.length - 1) {
+      return { [key]: direction };
+    }
+
+    return { [key]: acc };
+  }, {});
+}
+
+function buildSearchWhere(search: string, fields: string[]): Record<string, any> | undefined {
   if (!search || !fields.length) return undefined;
 
+  const conditions = fields
+    .map((field) => buildSearchConditionFromPath(field, search))
+    .filter(Boolean);
+
+  if (!conditions.length) {
+    return undefined;
+  }
+
   return {
-    OR: fields.map((field) => ({
-      [field]: {
-        contains: search,
-        mode: "insensitive",
-      },
-    })),
+    OR: conditions,
   };
 }
 
-export function parsePaginationQuery<Entity>(
+function buildSearchConditionFromPath(fieldPath: string, search: string) {
+  const keys = fieldPath
+    .split(".")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (!keys.length) {
+    return null;
+  }
+
+  return keys.reduceRight<any>((acc, key, index) => {
+    if (index === keys.length - 1) {
+      return {
+        [key]: {
+          contains: search,
+          mode: "insensitive",
+        },
+      };
+    }
+
+    return { [key]: acc };
+  }, {});
+}
+
+export function parsePaginationQuery(
   query: BasePaginationQueryDto,
-  overrides?: Partial<PaginateOptions<Entity>>,
-): PaginateOptions<Entity> {
+  overrides?: Partial<PaginateOptions>,
+): PaginateOptions {
   return {
-    page: query.page,
-    limit: query.limit,
+    page: query.page ? Number(query.page) : 1,
+    limit: query.limit ? Number(query.limit) : 10,
     search: query.search,
     sortBy: query.sortBy,
     desc: query.desc,

@@ -1,13 +1,14 @@
-export interface PaginateOptions<Entity = any> {
+export interface PaginateOptions {
   page?: number;
   limit?: number;
 
   search?: string;
-  searchFields?: (keyof Entity)[];
+  searchFields?: string[];
 
   sortBy?: string;
   desc?: boolean;
-  allowedSortBy?: (keyof Entity)[];
+  allowedSortBy?: string[];
+  stableSortBy?: string[];
 }
 
 export interface PaginateMeta {
@@ -24,7 +25,9 @@ export interface PaginateMeta {
 
 export interface PaginateResult<T> {
   data: T[];
-  meta: PaginateMeta;
+  meta: {
+    pagination: PaginateMeta;
+  };
 }
 
 export interface PrismaPaginateModel<FindManyArgs extends { where?: any }, Entity> {

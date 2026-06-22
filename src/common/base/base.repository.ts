@@ -11,6 +11,7 @@ import { PrismaService } from "src/services/prisma/prisma.service";
  * @template TOrderByInput - Order by input type
  * @template TInclude - Include/relations input type
  * @template TSelect - Select fields input type
+ * @template TOmitFields - Omit fields input type
  */
 export abstract class BaseRepository<
   TDelegate,
@@ -30,18 +31,39 @@ export abstract class BaseRepository<
     private readonly hasSoftDelete?: boolean,
   ) {}
 
+  private withSoftDeleteWhere(where: any) {
+    if (!this.hasSoftDelete) {
+      return where;
+    }
+
+    const next = where ? { ...where } : {};
+
+    // If caller explicitly sets deleted_at, respect it.
+    if (next.deleted_at === undefined) {
+      next.deleted_at = null;
+    }
+
+    return next;
+  }
+
   /**
    * Find a single record by unique identifier
    */
-  async findUnique(
-    where: TWhereUniqueInput,
-    options?: {
-      include?: TInclude;
-      select?: TSelect;
-      omit?: TOmitFields;
-    },
-  ): Promise<TModel | null> {
-    return (this.delegate as any).findUnique({ where, ...options });
+  async findUnique(params: {
+    where: TWhereUniqueInput;
+    include?: TInclude;
+    select?: TSelect;
+    omit?: TOmitFields;
+  }): Promise<TModel | null> {
+    if (this.hasSoftDelete) {
+      // Unique inputs can't be AND-ed with deleted_at in Prisma, so we fallback to findFirst.
+      return (this.delegate as any).findFirst({
+        ...params,
+        where: this.withSoftDeleteWhere(params.where as any),
+      });
+    }
+
+    return (this.delegate as any).findUnique(params);
   }
 
   /**
@@ -49,13 +71,20 @@ export abstract class BaseRepository<
    */
   async findById(
     id: number | string,
-    options?: {
-      include?: TInclude;
-      select?: TSelect;
-      omit?: TOmitFields;
-    },
+    include?: TInclude,
+    select?: TSelect,
+    omit?: TOmitFields,
   ): Promise<TModel | null> {
-    return this.findUnique({ id } as TWhereUniqueInput, options);
+    if (this.hasSoftDelete) {
+      return this.findFirst({
+        where: { id } as any,
+        include,
+        select,
+        omit,
+      });
+    }
+
+    return this.findUnique({ where: { id } as TWhereUniqueInput, include, select, omit });
   }
 
   /**
@@ -66,10 +95,14 @@ export abstract class BaseRepository<
     orderBy?: TOrderByInput | TOrderByInput[];
     include?: TInclude;
     select?: TSelect;
+    omit?: TOmitFields;
     skip?: number;
     take?: number;
   }): Promise<TModel | null> {
-    return (this.delegate as any).findFirst(params);
+    return (this.delegate as any).findFirst({
+      ...params,
+      where: this.withSoftDeleteWhere(params?.where),
+    });
   }
 
   /**
@@ -82,9 +115,13 @@ export abstract class BaseRepository<
     take?: number;
     include?: TInclude;
     select?: TSelect;
+    omit?: TOmitFields;
     cursor?: TWhereUniqueInput;
   }): Promise<TModel[]> {
-    return (this.delegate as any).findMany(params);
+    return (this.delegate as any).findMany({
+      ...params,
+      where: this.withSoftDeleteWhere(params?.where),
+    });
   }
 
   /**
@@ -93,6 +130,7 @@ export abstract class BaseRepository<
   async findAll(params?: {
     include?: TInclude;
     select?: TSelect;
+    omit?: TOmitFields;
     orderBy?: TOrderByInput | TOrderByInput[];
   }): Promise<TModel[]> {
     return this.findMany(params);
@@ -106,6 +144,7 @@ export abstract class BaseRepository<
     options?: {
       include?: TInclude;
       select?: TSelect;
+      omit?: TOmitFields;
     },
   ): Promise<TModel> {
     return (this.delegate as any).create({ data, ...options });
@@ -129,6 +168,7 @@ export abstract class BaseRepository<
     data: TUpdateInput;
     include?: TInclude;
     select?: TSelect;
+    omit?: TOmitFields;
   }): Promise<TModel> {
     return (this.delegate as any).update(params);
   }
@@ -171,6 +211,7 @@ export abstract class BaseRepository<
     update: TUpdateInput;
     include?: TInclude;
     select?: TSelect;
+    omit?: TOmitFields;
   }): Promise<TModel> {
     return (this.delegate as any).upsert(params);
   }
@@ -182,6 +223,7 @@ export abstract class BaseRepository<
     where: TWhereUniqueInput;
     include?: TInclude;
     select?: TSelect;
+    omit?: TOmitFields;
   }): Promise<TModel> {
     return (this.delegate as any).delete(params);
   }
@@ -245,7 +287,7 @@ export abstract class BaseRepository<
    * Count records matching the criteria
    */
   async count(where?: TWhereInput): Promise<number> {
-    return (this.delegate as any).count({ where });
+    return (this.delegate as any).count({ where: this.withSoftDeleteWhere(where) });
   }
 
   /**
