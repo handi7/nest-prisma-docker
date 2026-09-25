@@ -10,12 +10,17 @@ export const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
   APP_PORT: z.coerce.number().default(2000),
 
-  CLIENT_URL: z.string(),
+  /** Base URL of the frontend; used for links in emails/redirects, and its origin for CORS. */
+  CLIENT_URL: z.url(),
 
-  ORIGIN: z.string().optional(),
+  /** Extra comma-separated CORS origins (scheme + host + port, no path). */
+  APP_ORIGINS: z.string().optional(),
 
   PRISMA_LOGGING: booleanString(false),
   VALIDATION_LOGGING: booleanString(false),
+
+  /** API docs at /docs are on outside production; set this to force them on in production. */
+  SWAGGER_ENABLED: booleanString(false),
 
   DATABASE_URL: z.string(),
 

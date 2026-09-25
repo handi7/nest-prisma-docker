@@ -1,16 +1,17 @@
-version: "3.9"
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-      target: ${DOCKER_TARGET:-dev}
+      target: ${DOCKER_TARGET:-development}
     container_name: nestjs_app
     ports:
       - "${APP_PORT}:${APP_PORT}"
     env_file:
       - .env
+    environment:
+      # File watching over a bind mount needs polling on macOS/Windows hosts
+      CHOKIDAR_USEPOLLING: "true"
     volumes:
       - .:/app
       - /app/node_modules

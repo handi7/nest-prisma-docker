@@ -45,7 +45,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const isErrorValidation = Boolean(exceptionResponse?.validation);
 
     if (isErrorValidation) {
-      const isLoggingActive = this.env.get("VALIDATION_LOGGING") === "true";
+      const isLoggingActive = Boolean(this.env.get("VALIDATION_LOGGING"));
       if (!request.originalUrl.startsWith("/auth") && isLoggingActive) {
         this.logger.error(exceptionResponse.validation, "Validation");
       }

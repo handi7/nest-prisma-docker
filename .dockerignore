@@ -1,4 +1,8 @@
 node_modules
 dist
+generated
+coverage
+.git
 .env
-.env.production
+.env.*
+!.env.example

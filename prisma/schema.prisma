@@ -5,8 +5,13 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  // Pinned rather than inferred from tsconfig.json, which isn't always present when generate
+  // runs (e.g. the Docker dependencies stage) — inference then falls back to ESM with `.ts`
+  // imports, and the compiled CommonJS app can no longer load the client.
+  moduleFormat        = "cjs"
+  importFileExtension = ""
 }
 
 datasource db {
